@@ -68,13 +68,15 @@ LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_piloty.csv" INTO T
 LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_status.csv" INTO TABLE status CHARACTER SET 'utf8mb4' FIELDS TERMINATED BY ';' IGNORE 1 LINES;
 
 -- widok dla ochroniarza - rejestracje pojazdow majacych abonament w danym miesiącu
-create view lista_aktywnych_pojazdow as select id_m as numer_miejsca, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s)
+create view lista_aktywnych_pojazdow as select id_m as numer_miejsca, samochod.rejestracja, data_start, data_koniec from miejsce
+	join status using(id_m) join klient using (id_k) join samochod using (id_s)
 	where curdate() >= data_start and curdate() <= data_koniec order by rejestracja;
 select * from lista_aktywnych_pojazdow;
 
 -- widok klientow z rejestracjami oraz wykupionym abonamentem
-create view lista_aktywnych_klientow as select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s)
-	where curdate() >= data_start and curdate() <= data_koniec order by id_m;
+create view lista_aktywnych_klientow as select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
+	join status using(id_m) join klient using (id_k) join samochod using (id_s)
+    where curdate() >= data_start and curdate() <= data_koniec order by id_m;
 select * from lista_aktywnych_klientow;
 
 -- widok posiadaczy pilotów
@@ -82,20 +84,22 @@ create view lista_posiadaczy_pilotow as select distinct imie, nazwisko, nr_p fro
 select * from lista_posiadaczy_pilotow;
 
 -- widok klientów z abonamentem na więcej niż jeden miesiąc (mniej niż 12 miesięcy)
-create view lista_klientow_premium as select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s)
-	where abs(month(data_start) - month(data_koniec)) > 1 order by id_m;
+create view lista_klientow_premium as select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
+	join status using(id_m) join klient using (id_k) join samochod using (id_s) where abs(month(data_start) - month(data_koniec)) > 1 order by id_m;
 select * from lista_klientow_premium;
 
 -- widok miejsc niewynajętych, które nie mają żadnych przeszkód
-create view lista_miejsc_niewynajetych_bez_przeszkod as select id_m, opis_m, klatka_m from miejsce left join status using (id_m) where id_st is null and slup_lewy = 0 and slup_prawy = 0 and sciana_lewa = 0 and sciana_prawa = 0 and sciana_przod = 0 and opis_m != 'brak';
+create view lista_miejsc_niewynajetych_bez_przeszkod as select id_m, opis_m, klatka_m from miejsce
+	left join status using (id_m) where id_st is null and slup_lewy = 0 and slup_prawy = 0 and sciana_lewa = 0 and sciana_prawa = 0 and sciana_przod = 0 and opis_m != 'brak';
 select * from lista_miejsc_niewynajetych_bez_przeszkod;
 
 -- lista wszystkich klientów i pojazdów
 select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko;
 
 -- lista klientów z nadchodzącym abonamentem
-select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s)
-	where curdate() < date(data_start) order by id_m;
+select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
+	join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by id_m;
 
 -- lista klientów mających najwięcej pojazdów
-select concat_ws(' ',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko;
+select concat_ws(' ',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status
+	join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko;
