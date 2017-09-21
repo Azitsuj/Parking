@@ -103,3 +103,10 @@ select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja
 -- lista klientów mających najwięcej pojazdów
 select concat_ws(' ',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status
 	join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko;
+
+select count(*) liczba_wszystkich_miejsc from miejsce where opis_m != 'brak';
+select count(*) liczba_klientow from klient;
+select count(*) liczba_samochodow from samochod;
+select count(*) liczba_pilotow from pilot;
+
+describe status;
