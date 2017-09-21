@@ -1,0 +1,17 @@
+id_k;imie;nazwisko;ulica;nr_budynku;nr_mieszkania;kod;miasto
+1;Henryk;Kowalski;Przykładowa;1A;1;00-799;Warszawa
+2;Michał;Nowak;Przykładowa;1C;10;00-799;Warszawa
+3;Zdzisław;Iksiński;Przykładowa;1;12;00-799;Warszawa
+4;Joanna;Konarzewska;Przykładowa;1D;15;00-799;Warszawa
+5;Katarzyna;Cyrankiewicz;Przykładowa;1E;8;00-799;Warszawa
+6;Karol;Luśniak;Przykładowa;1B;15;00-799;Warszawa
+7;Józef;Marciniak;Przykładowa;1T;2;00-799;Warszawa
+8;Grażyna;Olecka;Przykładowa;1F;7;00-799;Warszawa
+9;Małgorzata;Wczorajsza;Przykładowa;1C;21;00-799;Warszawa
+10;Lucyna;Wąsacz;Przykładowa;1S;3;00-799;Warszawa
+11;Teresa;Kamińska;Przykładowa;1;5;00-799;Warszawa
+12;Leokadia;Trąba;Wyjątkowa;3;5;00-798;Warszawa
+13;Olgierd;Wydumany;Przykładowa;1;9;00-799;Warszawa
+14;Piotr;Chrabąszcz;Przykładowa;1L;4;00-799;Warszawa
+15;Zenobiusz;Aktywny;Przykładowa;1L;34;00-799;Warszawa
+16;Herman;Zaradny;Przykładowa;1G;22;00-799;Warszawa
