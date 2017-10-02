@@ -4,7 +4,18 @@ create database parking;
 
 use parking;
 
+-- tworzy uzytkownika na potrzeby Pythona
+drop user if exists python;
+create user python identified by 'strongPasswordWouldBeNice';
+grant select, insert, delete, update on parking.* to 'x'@'localhost' identified by 'strongPasswordWouldBeNice';
+
 -- tworzenie tabel
+create table login (
+	id int primary key auto_increment,
+    login varchar(20),
+    passwd varchar(131)
+);
+
 create table miejsce (
 	id_m int primary key auto_increment,
     opis_m text,
@@ -56,6 +67,8 @@ create table status(
     foreign key (id_m) references miejsce (id_m)
 );
 
+-- wczytanie tabeli logowania
+LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_login.csv" INTO TABLE login FIELDS TERMINATED BY ';' IGNORE 1 LINES;
 -- wczytanie tabeli miejsc
 LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_miejsca_final.csv" INTO TABLE miejsce FIELDS TERMINATED BY ';' IGNORE 1 LINES;
 -- wczytanie tabeli klientów
@@ -66,6 +79,9 @@ LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_samochody.csv" INT
 LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_piloty.csv" INTO TABLE pilot CHARACTER SET 'utf8mb4' FIELDS TERMINATED BY ';' IGNORE 1 LINES;
 -- wczytanie tabeli statusu
 LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_status.csv" INTO TABLE status CHARACTER SET 'utf8mb4' FIELDS TERMINATED BY ';' IGNORE 1 LINES;
+
+-- lista loginow
+select * from login;
 
 -- widok dla ochroniarza - rejestracje pojazdow majacych abonament w danym miesiącu
 create view lista_aktywnych_pojazdow as select id_m as numer_miejsca, samochod.rejestracja, data_start, data_koniec from miejsce
@@ -92,6 +108,13 @@ select * from lista_klientow_premium;
 create view lista_miejsc_niewynajetych_bez_przeszkod as select id_m, opis_m, klatka_m from miejsce
 	left join status using (id_m) where id_st is null and slup_lewy = 0 and slup_prawy = 0 and sciana_lewa = 0 and sciana_prawa = 0 and sciana_przod = 0 and opis_m != 'brak';
 select * from lista_miejsc_niewynajetych_bez_przeszkod;
+
+-- widok wszystkich miejsc wraz z aktywnymi samochodami oraz danymi klienta (imię, nazwisko)
+create view lista_miejsc as select id_m, opis_m, coalesce(sa.rejestracja, '') as nr_rejestracji, coalesce(kl.imie, '') as imie,
+	coalesce(kl.nazwisko, '') as nazwisko from miejsce as mi
+	left join status as st using (id_m) left join klient as kl using (id_k)
+	left join samochod as sa using (id_s) where mi.opis_m <> 'brak' order by mi.id_m;
+select * from lista_miejsc;
 
 -- lista wszystkich klientów i pojazdów
 select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko;
