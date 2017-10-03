@@ -1,83 +1,54 @@
 # -*- coding: utf-8 -*-
 
 import pymysql
-import Headers
-import datetime
+
+from Tools import ToolsUser, TableHeaders, PrintingTable
+from DatabaseCon import close, login
+
 
 class User:
     
-    def __init__(self):
-        print('Jestem w userze')
+    def __init__(self, conn, cursor):
+        print('Jesteś w userze')
+        User.panel_usera(self, conn, cursor)
     
-    def panel_usera(self, conn):
-       
+    def panel_usera(self, conn, cursor):
+                    
         while(True):
             print('Wybierz spośród poniższych: ')
-            choice = input('1 - lista uprawnionych pojazdów\n2 - lista wszystkich miejsc i pojazdów\nwybierasz: ')
+            choice = input('1 - lista uprawnionych pojazdów\n2 - lista wszystkich miejsc i pojazdów\nq - wyloguj\nwybierasz: ').upper()
             if (choice == '1'):
-                User.lista_aktywnych_pojazdow(self)
-                input('Kontynuować?\n')
+                User.lista_aktywnych_pojazdow(self, conn, cursor)
+                input('Kontynuuj\n')
                 
             elif (choice == '2'):
-                User.lista_miejsc(self)
-                input('Kontynuować?\n')
+                User.lista_miejsc(self, conn, cursor)
+                input('Kontynuuj\n')
                 
+            elif (choice == 'Q'):
+                print('Zostałeś wylogowany')
+                # login(self)
+                break
+
             else:
-                conn.close()
-                print('Bye')
+                print('Wychodzisz z programu...')
+                close(self)
+                print('Wyszedłeś z programu')
                 break
             
         
-    def lista_aktywnych_pojazdow(self):
-        self.cursor.execute('SELECT * FROM lista_aktywnych_pojazdow')
-        result = self.cursor.fetchall()
-        header = Headers.Headers.lista_aktywnych_pojazdow_h
-        widths = Headers.Headers.lista_aktywnych_pojazdow_w
-        align = Headers.Headers.lista_aktywnych_pojazdow_a
-        User.printingTable(self, result, header, widths, align)
+    def lista_aktywnych_pojazdow(self, conn, cursor):
+        cursor.execute('SELECT * FROM lista_aktywnych_pojazdow')
+        result = cursor.fetchall()
+        columns = ('id_m', 'rejestracja', 'data_start', 'data_stop')
+        table = PrintingTable.tableParameters(self, columns)
+        PrintingTable.printingTable(self, result, table)
 
-    def lista_miejsc(self):
-        self.cursor.execute('SELECT * FROM lista_miejsc')
-        result = self.cursor.fetchall()
-        header = Headers.Headers.lista_miejsc_h
-        widths = Headers.Headers.lista_miejsc_w
-        align = Headers.Headers.lista_miejsc_a
-        User.printingTable(self, result, header, widths, align)
+    def lista_miejsc(self, conn, cursor):
+        cursor.execute('SELECT * FROM lista_miejsc')
+        result = cursor.fetchall()
+        columns = ('id_m', 'opis_m', 'rejestracja', 'imie', 'nazwisko')
+        table = PrintingTable.tableParameters(self, columns)
+        PrintingTable.printingTable(self, result, table)
         
-    
-    def printingTable(self, result, header, widths, align):
-        widths_s = 0
-        widths_l = len(header) + 1
-        
-        for v in widths:
-            widths_s += int(v)
-        widths_total = (widths_l * 2) - 1 + widths_s
-        # Początek obramowania nagłówka tabeli
-        print(widths_total * '-')
-        
-        # Nagłówek tabeli
-        for v in header:
-            print('| {:{align}{w}}'.format(v, align = '^', w = widths[header.index(v)]), end = '')
-        print('|')
-        print(widths_total * '-')
-        # Koniec nagłówka ^
-        result_len = len(result)
-        i = 0
-        # Drukowanie zawartości tabeli
-        while (i < result_len):
-            k = len(result[i])
-            j = 0
-            while (j < k):
-                dateTest = (type(result[i][j] is datetime.date))
-                if (dateTest == True):
-                    print('| {:{a}{w}}'.format(x, a = align[j], w = widths[j]), end = '')
-                else:
-                    strConv = str(result[i][j])
-                    print('| {:{a}{w}}'.format(strConv, a = align[j], w = widths[j]), end = '')     
-                    # print(result[i][j])
-                j += 1
-            print('|')
-            i += 1
-        print(widths_total * '-')
-        # Koniec tabeli ^
     

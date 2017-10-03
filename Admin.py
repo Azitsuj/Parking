@@ -1,24 +1,45 @@
 # -*- coding: utf-8 -*-
 
 import pymysql
-import hashlib, binascii
+from Tools import ToolsAdmin
 from User import User
+from DatabaseCon import connection, close, login
 
-class Admin(User):
-
-    def __init__(self):
-        print('Jestem w adminie')
-        self.connection()
-        self.login()
-        if (self.login == 'user'):
-            print('user')
-            User.panel_usera(self, self.conn)
-        elif (self.login == 'admin'):
-            print('admin')
-            Admin.Admin.test(self)
-        else:
-            print('Podałeś złe dane logowania')
+class Admin:
     
+    def __init__(self, conn, cursor):
+        print('Jesteś w adminie')
+        Admin.panel_admina(self, conn, cursor)
+    
+    def panel_admina(self, conn, cursor):
+        
+        while(True):
+            print('Wybierz spośród poniższych: ')
+            choice = input(  '1 - lista uprawnionych pojazdów\
+                            \n2 - lista wszystkich miejsc i pojazdów\
+                            \nq - wyloguj\
+                            \nwybierasz: ').upper()
+            if (choice == '1'):
+                User.lista_aktywnych_pojazdow(self, conn, cursor)
+                input('Kontynuuj\n')
+               
+            elif (choice == '2'):
+                User.lista_miejsc(self, conn, cursor)
+                input('Kontynuuj\n')
+            
+            elif (choice == 'Q'):
+                print('Zostałeś wylogowany')
+                # login(self)
+                break
+            
+            else:
+                print('Zostałeś wylogowany')
+                # login(self)
+                break
+            
+
+    
+    '''
     def connection(self):
         while(True):
             try:
@@ -64,6 +85,6 @@ class Admin(User):
         haslo_enc = hashlib.pbkdf2_hmac('sha256', haslob, b'salt', 100000, dklen = 64)
         haslo_enc = binascii.hexlify(haslo_enc)
         return haslo_enc
-
+    '''
     
-test = Admin()
+# test = Admin()
