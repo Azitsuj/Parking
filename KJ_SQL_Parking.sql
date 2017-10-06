@@ -84,13 +84,13 @@ LOAD DATA LOCAL INFILE "c:/Users/Gustaw/Desktop/KJ_Parking/KJ_status.csv" INTO T
 select * from login;
 
 -- widok dla ochroniarza - rejestracje pojazdow majacych abonament w danym miesiącu
-create view lista_aktywnych_pojazdow as select id_m as numer_miejsca, samochod.rejestracja, data_start, data_koniec from miejsce
+create view lista_aktywnych_pojazdow as select id_m, samochod.rejestracja, data_start, data_koniec from miejsce
 	join status using(id_m) join klient using (id_k) join samochod using (id_s)
 	where curdate() >= data_start and curdate() <= data_koniec order by rejestracja;
 select * from lista_aktywnych_pojazdow;
 
 -- widok klientow z rejestracjami oraz wykupionym abonamentem
-create view lista_aktywnych_klientow as select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
+create view lista_aktywnych_klientow as select id_m, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
 	join status using(id_m) join klient using (id_k) join samochod using (id_s)
     where curdate() >= data_start and curdate() <= data_koniec order by id_m;
 select * from lista_aktywnych_klientow;
@@ -100,7 +100,7 @@ create view lista_posiadaczy_pilotow as select distinct imie, nazwisko, nr_p fro
 select * from lista_posiadaczy_pilotow;
 
 -- widok klientów z abonamentem na więcej niż jeden miesiąc (mniej niż 12 miesięcy)
-create view lista_klientow_premium as select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
+create view lista_klientow_premium as select id_m, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
 	join status using(id_m) join klient using (id_k) join samochod using (id_s) where abs(month(data_start) - month(data_koniec)) > 1 order by id_m;
 select * from lista_klientow_premium;
 
@@ -110,8 +110,8 @@ create view lista_miejsc_niewynajetych_bez_przeszkod as select id_m, opis_m, kla
 select * from lista_miejsc_niewynajetych_bez_przeszkod;
 
 -- widok wszystkich miejsc wraz z aktywnymi samochodami oraz danymi klienta (imię, nazwisko)
-create view lista_miejsc as select id_m, opis_m, coalesce(sa.rejestracja, '') as nr_rejestracji, coalesce(kl.imie, '') as imie,
-	coalesce(kl.nazwisko, '') as nazwisko from miejsce as mi
+create view lista_miejsc as select id_m, opis_m, coalesce(sa.rejestracja, ''), coalesce(kl.imie, ''),
+	coalesce(kl.nazwisko, '') from miejsce as mi
 	left join status as st using (id_m) left join klient as kl using (id_k)
 	left join samochod as sa using (id_s) where mi.opis_m <> 'brak' order by mi.id_m;
 select * from lista_miejsc;
@@ -120,7 +120,7 @@ select * from lista_miejsc;
 select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko;
 
 -- lista klientów z nadchodzącym abonamentem
-select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
+select id_m, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce
 	join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by id_m;
 
 -- lista klientów mających najwięcej pojazdów

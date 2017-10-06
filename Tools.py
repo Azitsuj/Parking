@@ -2,6 +2,7 @@
 
 import datetime
 
+'''
 class ToolsUser:
     
     # User view lista_aktywnych_pojazdow
@@ -13,11 +14,12 @@ class ToolsUser:
     lista_miejsc_h = ('Nr', 'Opis', 'Rejestracja', 'Imię', 'Nazwisko')
     lista_miejsc_w = ('4', '15', '11', '15', '20')
     lista_miejsc_a = ('>', '<', '^', '<', '<')
-    
+'''    
 class ToolsAdmin:
     lista = 0
     # ToDo--->>>
-    
+
+
 class TableHeaders:
     
     header_length = {
@@ -50,8 +52,11 @@ class TableHeaders:
         # status:
         'id_st':'8',
         'data_start':'12',
-        'data_stop':'12',
-        'utworzono':'12'
+        'data_koniec':'12',
+        'utworzono':'12',
+        # lista/najwięcej pojazdów:
+        'wlasciciel':'45',
+        'liczba_pojazdow':'15'
     }
     
     header_name = {
@@ -84,8 +89,11 @@ class TableHeaders:
         # status:
         'id_st':'Nr wpisu',
         'data_start':'Data od',
-        'data_stop':'Data do',
-        'utworzono':'Data wpisu'
+        'data_koniec':'Data do',
+        'utworzono':'Data wpisu',
+        # lista/najwięcej pojazdów:
+        'wlasciciel':'Imię i nazwisko',
+        'liczba_pojazdow':'Liczba pojazdów'        
     }
     
     content_position = {
@@ -118,8 +126,11 @@ class TableHeaders:
         # status:
         'id_st':'>',
         'data_start':'^',
-        'data_stop':'^',
-        'utworzono':'^'
+        'data_koniec':'^',
+        'utworzono':'^',
+        # lista/najwięcej pojazdów:
+        'wlasciciel':'<',
+        'liczba_pojazdow':'^'       
     }
     
 class PrintingTable:
@@ -163,11 +174,83 @@ class PrintingTable:
                 if (dateTest == True):
                     print('| {:{a}{w}}'.format(x, a = table[2][j], w = table[1][j]), end = '')
                 else:
-                    strConv = str(result[i][j])
+                    strConv = str(result[i][j]).replace('\r','')
                     print('| {:{a}{w}}'.format(strConv, a = table[2][j], w = table[1][j]), end = '')     
                     # print(result[i][j])
                 j += 1
             print('|')
             i += 1
         print(widths_total * '-')
-        # Koniec     tabeli ^
+        # Koniec tabeli ^
+        
+class UserMenu(TableHeaders):
+    
+    def sortOption(self, columns):
+        sortInput = input('Czy chcesz zmienić domyślne sortowanie? Jeśli tak, wybierz \'1\', aby pominąć wciśnij dowolny klawisz: ')
+        if sortInput == '1':
+            sortType = input('Czy chcesz zmienić domyślne sortowanie na malejące? Jeśli tak, wybierz \'1\' ')
+            print('Po której kolumnie chcesz sortować:')
+            k = 1
+            for i in columns:
+                print(str(k) + ' - ' + TableHeaders.header_name[i])
+                k += 1
+            sortInput = input('Podaj numer kolumny: ')
+            if sortType != '1':
+                return str(sortInput)
+            else:
+                return str(sortInput + 'desc')
+        else:
+            print('Powrót do poprzedniego menu')
+            return False
+        
+    def sortMany(self, sortInput, query, columns, sortType):
+        print('sortInput: ' + str(sortInput))
+        i = len(sortInput)
+        if (i > 1):
+            sortInput = list(sortInput)
+            sortFinal = []
+            for i in sortInput:
+                sortFinal += i
+        else:
+            sortFinal = sortInput
+        queryFinal = query
+        print('sortFinal: ' + str(sortFinal))
+        for k in sortFinal:
+            print(k)
+            print(queryFinal)
+            queryFinal = queryFinal + self.columns[int(k) - 1] + ', '
+        queryFinal = queryFinal[:-2] + sortType
+        print(queryFinal)
+        return queryFinal
+    
+    def sortQuestion(self):
+        sortq = input('Aby powrócić do menu sortowania, wybierz \'1\', aby powrócić do poprzedniego menu, wybierz dowolny klawisz: ')
+        if sortq == '1':
+            return 'sort again'
+        else:
+            return False
+            
+class SQLQueries:
+    # zapytania usera:
+    lista_aktywnych_pojazdow = 'SELECT * FROM lista_aktywnych_pojazdow'
+    lista_aktywnych_pojazdow_sorted = 'SELECT * FROM lista_aktywnych_pojazdow ORDER BY '
+    lista_miejsc = 'SELECT * FROM lista_miejsc'
+    lista_miejsc_sorted = 'SELECT * FROM lista_miejsc ORDER BY '
+    # zapytania admina:
+    lista_aktywnych_klientow = 'select * from lista_aktywnych_klientow'
+    lista_aktywnych_klientow_sorted = 'select * from lista_aktywnych_klientow order by '
+    lista_posiadaczy_pilotow = 'select * from lista_posiadaczy_pilotow'
+    lista_posiadaczy_pilotow_sorted = 'select * from lista_posiadaczy_pilotow order by '
+    lista_klientow_z_abonamentem = 'select * from lista_klientow_premium'
+    lista_klientow_z_abonamentem_sorted = 'select * from lista_klientow_premium order by '
+    lista_miejsc_niewynajetych = 'select * from lista_miejsc_niewynajetych_bez_przeszkod'
+    lista_miejsc_niewynajetych_sorted = 'select * from lista_miejsc_niewynajetych_bez_przeszkod order by '
+    lista_wszystkich_klientow = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko'
+    lista_wszystkich_klientow_sorted = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by '
+    lista_klientow_z_nadchodzacym = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by id_m'
+    lista_klientow_z_nadchodzacym_sorted = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by '
+    lista_klientow_duzo_samochodow = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) as liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko'
+    lista_klientow_duzo_samochodow_sorted = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by '
+    # tabele
+    tabela_miejsc = 'select * from miejsce'
+    tabela_miejsc_sorted = 'select * from miejsce order by '
