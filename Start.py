@@ -30,4 +30,4 @@ class Start:
                 print('Nie powinieneś nigdy zobaczyć tego komunikatu...')
                 break
    
-test = Start()
+run = Start()

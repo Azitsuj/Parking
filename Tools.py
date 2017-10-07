@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+from operator import itemgetter, attrgetter, methodcaller
 
 '''
 class ToolsUser:
@@ -166,6 +167,8 @@ class PrintingTable:
         result_len = len(result)
         i = 0
         # Drukowanie zawartości tabeli (tuple'a):
+        # do testów while:
+        # while (i < 1):
         while (i < result_len):
             k = len(result[i])
             j = 0
@@ -175,6 +178,7 @@ class PrintingTable:
                     print('| {:{a}{w}}'.format(x, a = table[2][j], w = table[1][j]), end = '')
                 else:
                     strConv = str(result[i][j]).replace('\r','')
+                    # print(strConv)
                     print('| {:{a}{w}}'.format(strConv, a = table[2][j], w = table[1][j]), end = '')     
                     # print(result[i][j])
                 j += 1
@@ -184,6 +188,54 @@ class PrintingTable:
         # Koniec tabeli ^
         
 class UserMenu(TableHeaders):
+    
+    def sorting(self, columns, result):
+        self.collist = []
+        ascdesc = []
+        collisttemp = list(columns)
+        pytanie = False
+        counter = 0
+        while(True):
+            if counter == len(collisttemp):
+                break            
+            if pytanie == False:
+                sortInput = input('Czy chcesz zmienić sortowanie? Jeśli tak, wybierz \'1\', aby pominąć wciśnij dowolny klawisz: ')
+            else:
+                sortInput = input('Czy chcesz dodać kolejną kolumnę sortowania? Jeśli tak, wybierz \'1\', aby pominąć wciśnij dowolny klawisz: ')
+            if sortInput == '1':
+                print('Wybierz kolumnę(y) sortowania:')
+                for i, v in enumerate(collisttemp):
+                    if v != 0:
+                        print(str(i + 1) + ':\t' + TableHeaders.header_name[v])
+                idkol = int(input('Podaj nr kolumny: ')) - 1
+                try:
+                    collisttemp[idkol] = 0
+                    self.collist.append(str(idkol))
+                    sort = True
+                except:
+                    print('Podałeś zły numer kolumny, spróbuj jeszcze raz')
+                    sort = False
+                while(sort):
+                    sorttype = input('Aby sortować rosnąco - wybierz \'1\', malejąco - wybierz \'2\': ')
+                    if sorttype == '1':
+                        sorttype = False
+                        break
+                    elif sorttype == '2':
+                        sorttype = True
+                        break
+                    else:
+                        print('Podałeś zły parametr sortowania, spróbuj ponownie')
+                if (sort == True):
+                    ascdesc.append(sorttype)
+                    counter += 1
+                    pytanie = True
+            else:
+                # return collist
+                break
+        for i, v in enumerate(self.collist):
+            self.result = sorted(self.result, key = itemgetter(int(v)), reverse = ascdesc[i])
+            print(self.result)
+        return self.result, self.collist
     
     def sortOption(self, columns):
         sortInput = input('Czy chcesz zmienić domyślne sortowanie? Jeśli tak, wybierz \'1\', aby pominąć wciśnij dowolny klawisz: ')
@@ -225,32 +277,31 @@ class UserMenu(TableHeaders):
     
     def sortQuestion(self):
         sortq = input('Aby powrócić do menu sortowania, wybierz \'1\', aby powrócić do poprzedniego menu, wybierz dowolny klawisz: ')
-        if sortq == '1':
-            return 'sort again'
-        else:
-            return False
+        if sortq != '1':
+            sortq = False
+        return sortq
             
 class SQLQueries:
     # zapytania usera:
     lista_aktywnych_pojazdow = 'SELECT * FROM lista_aktywnych_pojazdow'
-    lista_aktywnych_pojazdow_sorted = 'SELECT * FROM lista_aktywnych_pojazdow ORDER BY '
+    # lista_aktywnych_pojazdow_sorted = 'SELECT * FROM lista_aktywnych_pojazdow ORDER BY '
     lista_miejsc = 'SELECT * FROM lista_miejsc'
-    lista_miejsc_sorted = 'SELECT * FROM lista_miejsc ORDER BY '
+    # lista_miejsc_sorted = 'SELECT * FROM lista_miejsc ORDER BY '
     # zapytania admina:
     lista_aktywnych_klientow = 'select * from lista_aktywnych_klientow'
-    lista_aktywnych_klientow_sorted = 'select * from lista_aktywnych_klientow order by '
+    # lista_aktywnych_klientow_sorted = 'select * from lista_aktywnych_klientow order by '
     lista_posiadaczy_pilotow = 'select * from lista_posiadaczy_pilotow'
-    lista_posiadaczy_pilotow_sorted = 'select * from lista_posiadaczy_pilotow order by '
+    # lista_posiadaczy_pilotow_sorted = 'select * from lista_posiadaczy_pilotow order by '
     lista_klientow_z_abonamentem = 'select * from lista_klientow_premium'
-    lista_klientow_z_abonamentem_sorted = 'select * from lista_klientow_premium order by '
+    # lista_klientow_z_abonamentem_sorted = 'select * from lista_klientow_premium order by '
     lista_miejsc_niewynajetych = 'select * from lista_miejsc_niewynajetych_bez_przeszkod'
-    lista_miejsc_niewynajetych_sorted = 'select * from lista_miejsc_niewynajetych_bez_przeszkod order by '
+    # lista_miejsc_niewynajetych_sorted = 'select * from lista_miejsc_niewynajetych_bez_przeszkod order by '
     lista_wszystkich_klientow = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko'
-    lista_wszystkich_klientow_sorted = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by '
+    # lista_wszystkich_klientow_sorted = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by '
     lista_klientow_z_nadchodzacym = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by id_m'
-    lista_klientow_z_nadchodzacym_sorted = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by '
+    # lista_klientow_z_nadchodzacym_sorted = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by '
     lista_klientow_duzo_samochodow = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) as liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko'
-    lista_klientow_duzo_samochodow_sorted = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by '
+    # lista_klientow_duzo_samochodow_sorted = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by '
     # tabele
     tabela_miejsc = 'select * from miejsce'
-    tabela_miejsc_sorted = 'select * from miejsce order by '
+    # tabela_miejsc_sorted = 'select * from miejsce order by '

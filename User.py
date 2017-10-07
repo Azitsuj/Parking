@@ -22,46 +22,29 @@ class User:
             if (choice == '1'):
                 query = SQLQueries.lista_aktywnych_pojazdow
                 User.lista_aktywnych_pojazdow(self, conn, cursor, query)
-                sort = UserMenu.sortOption(self, self.columns)
+                sort = True
                 while(sort):
-                    print(sort)
-                    if sort == 'sort again':
-                        sort = UserMenu.sortOption(self, self.columns)
-                        if sort == False:
-                            break
-                    sort_kol = self.columns[int(sort[0]) - 1]
-                    try:
-                        if sort[1] == 'desc':
-                            sortType = ' desc'
-                    except:
-                        sortType = ''
-                    query = SQLQueries.lista_aktywnych_pojazdow_sorted + sort_kol + sortType
-                    User.lista_aktywnych_pojazdow(self, conn, cursor, query)
-                    sort = UserMenu.sortQuestion(self)
+                    UserMenu.sorting(self, self.columns, self.result)
+                    if len(self.collist) > 0:
+                        User.lista_aktywnych_pojazdow_sorted(self, self.result, self.columns)
+                        sort = UserMenu.sortQuestion(self)
+                    else:
+                        print('Wracasz do głównego menu')
+                        break
                 
             elif (choice == '2'):
                 query = SQLQueries.lista_miejsc
                 User.lista_miejsc(self, conn, cursor, query)
-                sort = UserMenu.sortOption(self, self.columns)
+                sort = True
                 while(sort):
-                    print(sort)
-                    if sort == 'sort again':
-                        sort = UserMenu.sortOption(self, self.columns)
-                        if sort == False:
-                            break
-                    sort_kol = self.columns[int(sort[0]) - 1]
-                    try:
-                        if sort[1] == 'desc':
-                            sortType = ' desc'
-                    except:
-                        sortType = ''
-                        
-                    query = SQLQueries.lista_miejsc_sorted + sort_kol + sortType
-                    User.lista_miejsc(self, conn, cursor, query)
-                    sort = UserMenu.sortQuestion(self)                
-                
-                # User.lista_miejsc(self, conn, cursor)
-                
+                    UserMenu.sorting(self, self.columns, self.result)
+                    if len(self.collist) > 0:
+                        User.lista_miejsc_sorted(self, self.result, self.columns)
+                        sort = UserMenu.sortQuestion(self)
+                    else:
+                        print('Wracasz do głównego menu')
+                        break
+            
             elif (choice == 'Q'):
                 print('Zostałeś wylogowany')
                 # login(self)
@@ -76,17 +59,26 @@ class User:
         
     def lista_aktywnych_pojazdow(self, conn, cursor, query):
         cursor.execute(query)
-        result = cursor.fetchall()
+        self.result = cursor.fetchall()
         self.columns = ('id_m', 'rejestracja', 'data_start', 'data_koniec')
         table = PrintingTable.tableParameters(self, self.columns)
-        PrintingTable.printingTable(self, result, table)
+        PrintingTable.printingTable(self, self.result, table)
         return self.columns
-        
+    
+    def lista_aktywnych_pojazdow_sorted(self, result, columns):
+        self.columns = ('id_m', 'rejestracja', 'data_start', 'data_koniec')
+        table = PrintingTable.tableParameters(self, self.columns)
+        PrintingTable.printingTable(self, self.result, table)   
 
     def lista_miejsc(self, conn, cursor, query):
         cursor.execute(query)
-        result = cursor.fetchall()
+        self.result = cursor.fetchall()
         self.columns = ('id_m', 'opis_m', 'rejestracja', 'imie', 'nazwisko')
         table = PrintingTable.tableParameters(self, self.columns)
-        PrintingTable.printingTable(self, result, table)
+        PrintingTable.printingTable(self, self.result, table)
         return self.columns
+
+    def lista_miejsc_sorted(self, result, columns):
+        self.columns = ('id_m', 'opis_m', 'rejestracja', 'imie', 'nazwisko')
+        table = PrintingTable.tableParameters(self, self.columns)
+        PrintingTable.printingTable(self, self.result, table) 
