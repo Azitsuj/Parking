@@ -14,7 +14,7 @@ def connection(self):
             break
     # ustawienie kursora na począteku
     self.cursor = self.conn.cursor()
-    return self.cursor
+    return self.cursor, self.conn
 
 def close(self):
     self.conn.close()

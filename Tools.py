@@ -190,6 +190,7 @@ class PrintingTable:
 class UserMenu(TableHeaders):
     
     def sorting(self, columns, result):
+        self.sortFalse = True
         self.collist = []
         ascdesc = []
         collisttemp = list(columns)
@@ -207,8 +208,8 @@ class UserMenu(TableHeaders):
                 for i, v in enumerate(collisttemp):
                     if v != 0:
                         print(str(i + 1) + ':\t' + TableHeaders.header_name[v])
-                idkol = int(input('Podaj nr kolumny: ')) - 1
                 try:
+                    idkol = int(input('Podaj nr kolumny: ')) - 1
                     collisttemp[idkol] = 0
                     self.collist.append(str(idkol))
                     sort = True
@@ -234,7 +235,7 @@ class UserMenu(TableHeaders):
                 break
         for i, v in enumerate(self.collist):
             self.result = sorted(self.result, key = itemgetter(int(v)), reverse = ascdesc[i])
-            print(self.result)
+            # print(self.result)
         return self.result, self.collist
     
     def sortOption(self, columns):
@@ -304,4 +305,19 @@ class SQLQueries:
     # lista_klientow_duzo_samochodow_sorted = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by '
     # tabele
     tabela_miejsc = 'select * from miejsce'
+    tabela_klientow = 'SELECT * FROM klient'
     # tabela_miejsc_sorted = 'select * from miejsce order by '
+    
+    # insert
+    tabela_klientow_insert = 'INSERT INTO klient (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    tabela_klientow_after_insert = 'SELECT * FROM klient WHERE imie = %s AND nazwisko = %s AND ulica = %s AND nr_budynku = %s AND nr_mieszkania = %s AND kod = %s AND miasto = %s'
+    
+    # update
+    tabela_miejsc_update = "UPDATE miejsce SET opis_m = %s WHERE id_m = %s"
+    tabela_miejsc_after_update = "SELECT * FROM miejsce WHERE opis_m = %s AND id_m = %s"
+    tabela_klientow_for_update = 'SELECT * FROM klient WHERE id_k = %s'
+    tabela_klientow_update = 'UPDATE klient SET imie = %s, nazwisko = %s, ulica = %s, nr_budynku = %s, nr_mieszkania = %s, kod = %s, miasto = %s WHERE id_k = %s'
+    tabela_klientow_after_update = 'SELECT * from klient WHERE id_k = %s'
+    
+    # delete
+    tabela_klientow_delete = 'DELETE FROM klient WHERE id_k = %s'

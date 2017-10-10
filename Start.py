@@ -10,14 +10,14 @@ class Start:
         connection(self)
         print('Za chwilę będziesz mógł się zalogować')
         login(self)
-        Start.startSelector(self, self.loggedUser, self.cursor)
+        Start.startSelector(self, self.loggedUser, self.cursor, self.conn)
     
-    def startSelector(self, loggedUser, cursor):
+    def startSelector(self, loggedUser, cursor, conn):
         while(True):
             if self.loggedUser == 0:
                 login(self)  
             elif (self.loggedUser == 'admin'):
-                Admin(login, cursor)
+                Admin(cursor, conn)
                 self.loggedUser = 0
             elif (self.loggedUser == 'user'):
                 User(login, cursor)
