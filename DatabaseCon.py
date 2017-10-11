@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import pymysql
 import hashlib, binascii
-
+import getpass, sys
+from msvcrt import getch
    
 def connection(self):
     while(True):
@@ -25,15 +26,16 @@ def login(self):
     i = 0
     while(i < 3):
         # temp user selecting
+        '''
         while(True):
             logtemp = input('Podaj login: 1 - admin, 2 - user, q - wyjście: ')
             if (logtemp == '1'):
                 self.loggedUser = 'admin'
-                p1 = 'admin'
+                pwd = 'admin'
                 break
             elif (logtemp == '2'):
                 self.loggedUser = 'user'
-                p1 = 'user'
+                pwd = 'user'
                 break
             elif (logtemp == 'q'):
                 break
@@ -43,15 +45,17 @@ def login(self):
             self.loggedUser = 'q'
             break
         # Koniec tymczasowego logowania
-        # self.loggedUser = input('Podaj login: ')
-        # p1 = input('Podaj hasło: ')
-        '''if self.loggedUser == 'Q':
+        '''
+        self.loggedUser = input('Podaj login (\'q\' aby wyjść): ')
+        if self.loggedUser.upper() == 'Q':
             print('Wyszedłeś z programu.')
-            break'''
-        p2 = encrypt(self, p1)
-        p3 = str(p2)
-        p4 = len(p3) - 1
-        passwd = p3[:1] + '\'' + p3[2:p4] + '\''
+            break
+        pwd = pyssword()
+        # pwd = input('Podaj hasło: ')
+        pwd2 = encrypt(self, pwd)
+        pwd3 = str(pwd2)
+        pwd4 = len(pwd3) - 1
+        passwd = pwd3[:1] + '\'' + pwd3[2:pwd4] + '\''
         self.cursor.execute('SELECT login, passwd FROM login WHERE login = %s and passwd = %s', (self.loggedUser, passwd))
         RS = self.cursor.fetchall()
         if (len(RS) != 0):
@@ -70,3 +74,36 @@ def encrypt(self, haslo):
     haslo_enc = hashlib.pbkdf2_hmac('sha256', haslob, b'salt', 100000, dklen = 64)
     haslo_enc = binascii.hexlify(haslo_enc)
     return haslo_enc
+
+def pyssword(prompt='Podaj hasło: '):
+    '''
+        Prompt for a password and masks the input.
+        Returns:
+            the value entered by the user.
+    '''
+    
+    if sys.stdin is not sys.__stdin__:
+        pwd = getpass.getpass(prompt)
+        return pwd
+    else:
+        pwd = ""        
+        sys.stdout.write(prompt)
+        sys.stdout.flush()        
+        while True:
+            key = ord(getch())
+            if key == 13: #Return Key
+                sys.stdout.write('\n')
+                return pwd
+                break
+            if key == 8: #Backspace key
+                if len(pwd) > 0:
+                    # Erases previous character.
+                    sys.stdout.write('\b' + ' ' + '\b')                
+                    sys.stdout.flush()
+                    pwd = pwd[:-1]                    
+            else:
+                # Masks user input.
+                char = chr(key)
+                sys.stdout.write('*')
+                sys.stdout.flush()                
+                pwd = pwd + char
