@@ -54,7 +54,7 @@ class TableHeaders:
         'id_st':'8',
         'data_start':'12',
         'data_koniec':'12',
-        'utworzono':'12',
+        'utworzono':'19',
         # lista/najwięcej pojazdów:
         'wlasciciel':'45',
         'liczba_pojazdow':'15'
@@ -283,30 +283,25 @@ class UserMenu(TableHeaders):
         return sortq
             
 class SQLQueries:
+    
     # zapytania usera:
     lista_aktywnych_pojazdow = 'SELECT * FROM lista_aktywnych_pojazdow'
-    # lista_aktywnych_pojazdow_sorted = 'SELECT * FROM lista_aktywnych_pojazdow ORDER BY '
-    lista_miejsc = 'SELECT * FROM lista_miejsc'
-    # lista_miejsc_sorted = 'SELECT * FROM lista_miejsc ORDER BY '
+    ista_miejsc = 'SELECT * FROM lista_miejsc'
+    
     # zapytania admina:
     lista_aktywnych_klientow = 'select * from lista_aktywnych_klientow'
-    # lista_aktywnych_klientow_sorted = 'select * from lista_aktywnych_klientow order by '
     lista_posiadaczy_pilotow = 'select * from lista_posiadaczy_pilotow'
-    # lista_posiadaczy_pilotow_sorted = 'select * from lista_posiadaczy_pilotow order by '
     lista_klientow_z_abonamentem = 'select * from lista_klientow_premium'
-    # lista_klientow_z_abonamentem_sorted = 'select * from lista_klientow_premium order by '
     lista_miejsc_niewynajetych = 'select * from lista_miejsc_niewynajetych_bez_przeszkod'
-    # lista_miejsc_niewynajetych_sorted = 'select * from lista_miejsc_niewynajetych_bez_przeszkod order by '
     lista_wszystkich_klientow = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko'
-    # lista_wszystkich_klientow_sorted = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by '
     lista_klientow_z_nadchodzacym = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by id_m'
-    # lista_klientow_z_nadchodzacym_sorted = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by '
     lista_klientow_duzo_samochodow = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) as liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko'
-    # lista_klientow_duzo_samochodow_sorted = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by '
-    # tabele
     tabela_miejsc = 'select * from miejsce'
     tabela_klientow = 'SELECT * FROM klient'
-    # tabela_miejsc_sorted = 'select * from miejsce order by '
+    tabela_samochodow = 'SELECT * FROM samochod'
+    tabela_pilotow = 'SELECT * FROM pilot'
+    tabela_statusow = 'SELECT * FROM status'
+    tabela_statusow_friendly = 'SELECT id_st, data_start, data_koniec, klient.imie, klient.nazwisko, samochod.rejestracja, samochod.marka, samochod.model, pilot.id_p, miejsce.id_m, miejsce.opis_m FROM status JOIN klient using(id_k) JOIN samochod using(id_s) JOIN pilot using(id_p) JOIN miejsce using(id_m) ORDER BY id_st'
     
     # insert
     tabela_klientow_insert = 'INSERT INTO klient (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto) VALUES (%s, %s, %s, %s, %s, %s, %s)'

@@ -26,7 +26,7 @@ def login(self):
     i = 0
     while(i < 3):
         # temp user selecting
-        '''
+        
         while(True):
             logtemp = input('Podaj login: 1 - admin, 2 - user, q - wyjście: ')
             if (logtemp == '1'):
@@ -51,6 +51,7 @@ def login(self):
             print('Wyszedłeś z programu.')
             break
         pwd = pyssword()
+        '''
         # pwd = input('Podaj hasło: ')
         pwd2 = encrypt(self, pwd)
         pwd3 = str(pwd2)

@@ -22,6 +22,7 @@ class Admin:
             choice = input(  '1 - Podgląd - lista widoków\
                             \n2 - Podgląd - lista tabel\
                             \n3 - Zarządzanie - edycja tabel\
+                            \n' + 5*'-' + '\
                             \nq - wyloguj\
                             \nwybierasz: ').upper()
             if (choice == '1'):
@@ -36,6 +37,7 @@ class Admin:
                                     \n10 - *lista wszystkich klientów*\
                                     \n11 - *lista klientów z nadchodzącym abonamentem*\
                                     \n12 - *lista klientów mających najwięcej pojazdów*\
+                                    \n' + 5*'-' + '\
                                     \nb - powrót do poprzedniego menu\
                                     \n\twybierasz: ').upper()
                     
@@ -171,9 +173,10 @@ class Admin:
                                                     \n2 - *tabela klientów*\
                                                     \n3 - *tabela samochodów*\
                                                     \n4 - *tabela pilotów*\
-                                                    \n5 - *tabela statusów* \
+                                                    \n5 - *tabela statusów*\
+                                                    \n' + 5*'-' + '\
                                                     \nb - powrót do poprzedniego menu\
-                                                    \nwybierasz: ').upper()                    
+                                                    \nwybierasz: ').upper()
                     if (choice == '1'):
                         query = SQLQueries.tabela_miejsc
                         Admin.tabela_miejsc(self, conn, cursor, query, 0, 0)
@@ -182,19 +185,63 @@ class Admin:
                             UserMenu.sorting(self, self.columns, self.result)
                             if (self.collist != []):
                                 Admin.tabela_miejsc_sorted(self, self.result, self.columns)
-                                sort = UserMenu.sortQuestion(self)                          
+                                sort = UserMenu.sortQuestion(self)
                             else:
+                                print('Wracasz do głównego menu')
                                 break
                         
-                    if (choice == '2'):
+                    elif (choice == '2'):
                         query = SQLQueries.tabela_klientow
                         Admin.tabela_klientow(self, conn, cursor, query, 0, 0)
                         sort = True
                         while(sort):
                             UserMenu.sorting(self, self.columns, self.result)
-                            Admin.tabela_klientow_sorted(self, self.result, self.columns)
-                            sort = UserMenu.sortQuestion(self)                          
-                        
+                            if (self.collist != []):
+                                Admin.tabela_klientow_sorted(self, self.result, self.columns)
+                                sort = UserMenu.sortQuestion(self)
+                            else:
+                                print('Wracasz do głównego menu')
+                                break
+                    
+                    elif (choice == '3'):
+                        query = SQLQueries.tabela_samochodow
+                        Admin.tabela_samochodow(self, conn, cursor, query, 0, 0)
+                        sort = True
+                        while(sort):
+                            UserMenu.sorting(self, self.columns, self.result)
+                            if (self.collist != []):
+                                Admin.tabela_samochodow_sorted(self, self.result, self.columns)
+                                sort = UserMenu.sortQuestion(self)
+                            else:
+                                print('Wracasz do głównego menu')
+                                break
+                    
+                    elif (choice == '4'):
+                        query = SQLQueries.tabela_pilotow
+                        Admin.tabela_pilotow(self, conn, cursor, query, 0, 0)
+                        sort = True
+                        while(sort):
+                            UserMenu.sorting(self, self.columns, self.result)
+                            if (self.collist != []):
+                                Admin.tabela_pilotow_sorted(self, self.result, self.columns)
+                                sort = UserMenu.sortQuestion(self)
+                            else:
+                                print('Wracasz do głównego menu')
+                                break
+                      
+                    elif (choice == '5'):
+                        query = SQLQueries.tabela_statusow
+                        Admin.tabela_statusow(self, conn, cursor, query, 0, 0)
+                        sort = True
+                        while(sort):
+                            UserMenu.sorting(self, self.columns, self.result)
+                            if (self.collist != []):
+                                Admin.tabela_statusow_sorted(self, self.result, self.columns)
+                                sort = UserMenu.sortQuestion(self)
+                            else:
+                                print('Wracasz do głównego menu')
+                                break
+                      
                     elif (choice == 'B'):
                         print('Powrót do głównego menu')
                         break
@@ -208,6 +255,7 @@ class Admin:
                                                                     \n3 - *edycja tabeli samochodów*\
                                                                     \n4 - *edycja tabeli pilotów*\
                                                                     \n5 - *edycja tabeli statusów* \
+                                                                    \n' + 5*'-' + '\
                                                                     \nb - powrót do poprzedniego menu\
                                                                     \nwybierasz: ').upper()                    
                     if (choice == '1'):
@@ -217,6 +265,7 @@ class Admin:
                                             \n1 - dodanie rekordu - zablokowane\
                                             \n2 - edycja rekordu\
                                             \n3 - usunięcie rekordu - zablokowane\
+                                            \n' + 5*'-' + '\
                                             \nb - powrót do poprzedniego menu\
                                             \nwybierasz: ').upper()
                             if (choice == '2'):
@@ -240,6 +289,7 @@ class Admin:
                                             \n1 - dodanie rekordu\
                                             \n2 - edycja rekordu\
                                             \n3 - usunięcie rekordu\
+                                            \n' + 5*'-' + '\
                                             \nb - powrót do poprzedniego menu\
                                             \nwybierasz: ').upper()
                             if (choice == '1'):
@@ -538,6 +588,143 @@ class Admin:
         cursor.execute(query, self.query_param)
         self.result = cursor.fetchall()
         self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
+        self.result_for_update = []
+        self.result_for_update.append(self.columns)
+        self.result_for_update.append(self.result)
+        
+    def tabela_samochodow(self, conn, cursor, query, query_update, query_updated):
+        temp = True
+        if (query != 0):
+            cursor.execute(query)
+            self.result = cursor.fetchall()
+            self.columns = ('id_s', 'id_k', 'rejestracja', 'marka', 'model')
+        else:
+            try:
+                cursor.execute(query_update, self.query_param_after)
+                if (self.delete_temp == False):
+                    conn.commit()
+                    print('Usunąłeś samochód o numerze: ' + str(self.query_param_after))
+                    print('Tabela samochodów po usunięciu wygląda następująco:')
+                    cursor.execute(query_updated)
+                    self.result = cursor.fetchall()
+                    
+                elif (self.execute):
+                    conn.commit()
+                    print('Dodałeś/zmieniłeś następujący samochód:')
+                    cursor.execute(query_updated, self.query_param_after)
+                    self.result = cursor.fetchall()
+                    
+            except:
+                print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
+                temp = False
+        if (temp != False):
+            table = PrintingTable.tableParameters(self, self.columns)
+            PrintingTable.printingTable(self, self.result, table)        
+        return self.columns    
+    
+    def tabela_samochodow_sorted(self, result, columns):
+        self.columns = ('id_s', 'id_k', 'rejestracja', 'marka', 'model')
+        table = PrintingTable.tableParameters(self, self.columns)
+        PrintingTable.printingTable(self, self.result, table)
+        
+    def tabela_samochodow_for_update(self, conn, cursor, query):
+        cursor.execute(query, self.query_param)
+        self.result = cursor.fetchall()
+        self.columns = ('id_s', 'id_k', 'rejestracja', 'marka', 'model')
+        self.result_for_update = []
+        self.result_for_update.append(self.columns)
+        self.result_for_update.append(self.result)
+        
+    def tabela_pilotow(self, conn, cursor, query, query_update, query_updated):
+        temp = True
+        if (query != 0):
+            cursor.execute(query)
+            self.result = cursor.fetchall()
+            self.columns = ('id_p', 'nr_p')
+        else:
+            try:
+                cursor.execute(query_update, self.query_param_after)
+                if (self.delete_temp == False):
+                    conn.commit()
+                    print('Usunąłeś pilot o numerze: ' + str(self.query_param_after))
+                    print('Tabela pilotów po usunięciu wygląda następująco:')
+                    cursor.execute(query_updated)
+                    self.result = cursor.fetchall()
+                    
+                elif (self.execute):
+                    conn.commit()
+                    print('Dodałeś/zmieniłeś następujący pilot:')
+                    cursor.execute(query_updated, self.query_param_after)
+                    self.result = cursor.fetchall()
+                    
+            except:
+                print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
+                temp = False
+        if (temp != False):
+            table = PrintingTable.tableParameters(self, self.columns)
+            PrintingTable.printingTable(self, self.result, table)        
+        return self.columns    
+    
+    def tabela_pilotow_sorted(self, result, columns):
+        self.columns = ('id_p', 'nr_p')
+        table = PrintingTable.tableParameters(self, self.columns)
+        PrintingTable.printingTable(self, self.result, table)
+        
+    def tabela_pilotow_for_update(self, conn, cursor, query):
+        cursor.execute(query, self.query_param)
+        self.result = cursor.fetchall()
+        self.columns = ('id_p', 'nr_p')
+        self.result_for_update = []
+        self.result_for_update.append(self.columns)
+        self.result_for_update.append(self.result)
+        
+    def tabela_statusow(self, conn, cursor, query, query_update, query_updated):
+        temp = True
+        if (query != 0):
+            cursor.execute(query)
+            self.result = cursor.fetchall()
+            self.columns = ('id_st', 'id_k', 'id_s', 'id_p', 'id_m', 'data_start', 'data_koniec', 'utworzono')
+        else:
+            try:
+                cursor.execute(query_update, self.query_param_after)
+                if (self.delete_temp == False):
+                    conn.commit()
+                    print('Usunąłeś status o numerze: ' + str(self.query_param_after))
+                    print('Tabela statusów po usunięciu wygląda następująco:')
+                    cursor.execute(query_updated)
+                    self.result = cursor.fetchall()
+                    
+                elif (self.execute):
+                    conn.commit()
+                    print('Dodałeś/zmieniłeś następujący status:')
+                    cursor.execute(query_updated, self.query_param_after)
+                    self.result = cursor.fetchall()
+                    
+            except:
+                print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
+                temp = False
+        if (temp != False):
+            table = PrintingTable.tableParameters(self, self.columns)
+            PrintingTable.printingTable(self, self.result, table)
+            pytanie = input('Czy chcesz zobaczyć wersję zagregowaną z danymi z innych tabel? \'t/n\': ').upper()
+            if pytanie == 'T':
+                query_friendly = SQLQueries.tabela_statusow_friendly
+                cursor.execute(query_friendly)
+                self.result = cursor.fetchall()
+                self.columns = ('id_st', 'data_start', 'data_koniec', 'imie', 'nazwisko', 'rejestracja', 'marka', 'model', 'id_p', 'id_m', 'opis_m')
+                table = PrintingTable.tableParameters(self, self.columns)
+                PrintingTable.printingTable(self, self.result, table)                
+        return self.columns
+    
+    def tabela_statusow_sorted(self, result, columns):
+        # self.columns = ('id_st', 'id_k', 'id_s', 'id_p', 'id_m', 'data_start', 'data_koniec', 'utworzono')
+        table = PrintingTable.tableParameters(self, self.columns)
+        PrintingTable.printingTable(self, self.result, table)
+        
+    def tabela_statusow_for_update(self, conn, cursor, query):
+        cursor.execute(query, self.query_param)
+        self.result = cursor.fetchall()
+        self.columns = ('id_st', 'id_k', 'id_s', 'id_p', 'id_m', 'data_start', 'data_koniec', 'utworzono')
         self.result_for_update = []
         self.result_for_update.append(self.columns)
         self.result_for_update.append(self.result)
