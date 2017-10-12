@@ -306,6 +306,8 @@ class SQLQueries:
     # insert
     tabela_klientow_insert = 'INSERT INTO klient (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto) VALUES (%s, %s, %s, %s, %s, %s, %s)'
     tabela_klientow_after_insert = 'SELECT * FROM klient WHERE imie = %s AND nazwisko = %s AND ulica = %s AND nr_budynku = %s AND nr_mieszkania = %s AND kod = %s AND miasto = %s'
+    tabela_samochodow_insert = 'INSERT INTO samochod (id_k, rejestracja, marka, model) VALUES (%s, %s, %s, %s)'
+    tabela_samochodow_after_insert = 'SELECT * FROM samochod WHERE id_k = %s AND rejestracja = %s AND marka = %s AND model = %s'
     
     # update
     tabela_miejsc_update = "UPDATE miejsce SET opis_m = %s WHERE id_m = %s"
@@ -313,6 +315,10 @@ class SQLQueries:
     tabela_klientow_for_update = 'SELECT * FROM klient WHERE id_k = %s'
     tabela_klientow_update = 'UPDATE klient SET imie = %s, nazwisko = %s, ulica = %s, nr_budynku = %s, nr_mieszkania = %s, kod = %s, miasto = %s WHERE id_k = %s'
     tabela_klientow_after_update = 'SELECT * from klient WHERE id_k = %s'
+    tabela_samochodow_update = 'UPDATE samochod SET id_k = %s, rejestracja = %s, marka = %s, model = %s WHERE id_s = %s'
+    tabela_samochodow_after_update = 'SELECT * FROM samochod WHERE id_s = %s'
+    tabela_samochodow_for_update = 'SELECT * FROM samochod WHERE id_s = %s'
     
     # delete
     tabela_klientow_delete = 'DELETE FROM klient WHERE id_k = %s'
+    tabela_samochodow_delete = 'DELETE FROM samochod WHERE id_s = %s'

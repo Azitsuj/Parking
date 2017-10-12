@@ -258,6 +258,7 @@ class Admin:
                                                                     \n' + 5*'-' + '\
                                                                     \nb - powrót do poprzedniego menu\
                                                                     \nwybierasz: ').upper()                    
+                    # Tabela miejsc
                     if (choice == '1'):
                         while(True):
                             self.execute = False
@@ -268,6 +269,12 @@ class Admin:
                                             \n' + 5*'-' + '\
                                             \nb - powrót do poprzedniego menu\
                                             \nwybierasz: ').upper()
+                            
+                            # Tabela miejsc - dodawanie
+                            if (choice == '1'):
+                                print('Nie można dodawać nowych miejsc! Nastąpi powrót do poprzedniego menu')
+                            
+                            # Tabela miejsc - edycja
                             if (choice == '2'):
                                 print('W tabeli miejsc możesz edytować jedynie opis')
                                 id_m = input('Podaj numer miejsca, które chcesz edytować: ')
@@ -278,10 +285,16 @@ class Admin:
                                 self.execute = True
                                 Admin.tabela_miejsc(self, conn, cursor, 0, query_update, query_updated)
                             
+                            # Tabela miejsc - usuwanie
+                            if (choice == '3'):
+                                print('Nie można usuwać istniejących miejsc! Nastąpi powrót do poprzedniego menu')
+                            
+                            # Tabela miejsc - powrót
                             elif (choice == 'B'):
                                 print('Powrót do poprzedniego menu')
                                 break
                             
+                    # Tabela klientów
                     if (choice == '2'):
                         while(True):
                             self.execute = False
@@ -292,6 +305,8 @@ class Admin:
                                             \n' + 5*'-' + '\
                                             \nb - powrót do poprzedniego menu\
                                             \nwybierasz: ').upper()
+                            
+                            # Tabela klientów - dodawanie
                             if (choice == '1'):
                                 imie = input('Podaj imię nowego klienta: ')
                                 nazwisko = input('Podaj nazwisko nowego klienta: ')
@@ -303,9 +318,12 @@ class Admin:
                                 query_update = SQLQueries.tabela_klientow_insert
                                 query_updated = SQLQueries.tabela_klientow_after_insert
                                 self.query_param = (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto)
-                                self.execute = True
+                                self.addnew = True
+                                self.execute = False
+                                self.delete_temp = True
                                 Admin.tabela_klientow(self, conn, cursor, 0, query_update, query_updated)
                             
+                            # Tabela klientów - edycja
                             if (choice == '2'):
                                 while(True):
                                     id_k = int(input('Podaj id klienta, którego dane chcesz zmieniać: '))
@@ -376,9 +394,12 @@ class Admin:
                                 query_updated = SQLQueries.tabela_klientow_after_update
                                 self.query_param = (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto, id_k)
                                 self.query_param_after = (id_k)
+                                self.delete_temp = True
                                 self.execute = True
+                                self.addnew = False
                                 Admin.tabela_klientow(self, conn, cursor, 0, query_update, query_updated)
                             
+                            # Tabela klientów - usuwanie
                             if (choice == '3'):
                                 delete_tekst = 0
                                 while(True):
@@ -413,19 +434,163 @@ class Admin:
                                             query_after_delete = SQLQueries.tabela_klientow
                                             self.query_param_after = (id_klient)
                                             self.delete_temp = False
+                                            self.execute = False
+                                            self.addnew = False
                                             Admin.tabela_klientow(self, conn, cursor, 0, query_delete, query_after_delete)
                                             delete_tekst = True
                                             
                                     
-                            
+                            # Tabela klientów - powrót
                             elif (choice == 'B'):
                                 print('Powrót do poprzedniego menu')
                                 break
+                    
+                    # Tabela pojazdów
+                    if (choice == '3'):
+                        while(True):
+                            self.execute = False
+                            choice = input('Wszedłeś do edycji tabeli samochodów, wybierz rodzaj działania:\
+                                            \n1 - dodanie rekordu\
+                                            \n2 - edycja rekordu\
+                                            \n3 - usunięcie rekordu\
+                                            \n' + 5*'-' + '\
+                                            \nb - powrót do poprzedniego menu\
+                                            \nwybierasz: ').upper()
+                            # Tabela pojazdów - dodanie
+                            if (choice == '1'):
+                                rejestracja = input('Podaj numer rejestracji nowego pojazdu: ')
+                                marka = input('Podaj markę nowego pojazdu: ')
+                                model = input('Podaj model nowego pojazdu: ')
+                                self.pojazd = input('Czy chcesz sprawdzić tabelę klientów przed podaniem nr klienta dla wprowadzanego pojazdu? \'t/n\': ').upper()
+                                if (self.pojazd == 'T'):
+                                    query = SQLQueries.tabela_klientow
+                                    Admin.tabela_klientow(self, conn, cursor, query, 0, 0)
+                                    sort = True
+                                    while(sort):
+                                        UserMenu.sorting(self, self.columns, self.result)
+                                        if (self.collist != []):
+                                            Admin.tabela_klientow_sorted(self, self.result, self.columns)
+                                            sort = UserMenu.sortQuestion(self)
+                                        else:
+                                            print('Kontynuujesz wprowadzanie nowego pojazdu')
+                                            break
+                                id_k = input('Podaj nr klienta, do którego należy pojazd: ')
+                                query_update = SQLQueries.tabela_samochodow_insert
+                                query_updated = SQLQueries.tabela_samochodow_after_insert
+                                self.query_param = (id_k, rejestracja, marka, model)
+                                self.delete_temp = True
+                                self.execute = False
+                                self.addnew = True
+                                Admin.tabela_samochodow(self, conn, cursor, 0, query_update, query_updated)
                             
+                            # Tabela pojazdów - edycja
+                            if (choice == '2'):
+                                while(True):
+                                    id_s = int(input('Podaj nr pojazdu, którego dane chcesz zmieniać: '))
+                                    if (id_s):
+                                        query = SQLQueries.tabela_samochodow_for_update
+                                        self.query_param = (id_s)
+                                        Admin.tabela_samochodow_for_update(self, conn, cursor, query)
+                                        break
+                                    else:
+                                        print('Podałeś zły nr pojazdu, spróbuj ponownie')
+                                choice = input('Czy chcesz zmienić rejestrację? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Rejestracja przed zmianą: ' + str(self.result_for_update[1][0][2]))
+                                    rejestracja = input('Podaj nową rejestrację (aby pominąć, wciśnij Enter): ')
+                                    if (rejestracja == ''):
+                                        rejestracja = self.result_for_update[1][0][2]
+                                else:
+                                    rejestracja = self.result_for_update[1][0][2]
+                                choice = input('Czy chcesz markę pojazdu? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Marka pojazdu przed zmianą: ' + str(self.result_for_update[1][0][3]))
+                                    marka = input('Podaj nową markę pojazdu (aby pominąć, wciśnij Enter): ')
+                                    if (marka == ''):
+                                        marka = self.result_for_update[1][0][3]
+                                else:
+                                    marka = self.result_for_update[1][0][3]
+                                choice = input('Czy chcesz zmienić model pojazdu? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Model przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][4]))
+                                    model = input('Podaj nowy model pojazdu: ')
+                                    if (model == ''):
+                                        model = self.result_for_update[1][0][4]
+                                else:
+                                    model = self.result_for_update[1][0][4]
+                                choice = input('Czy chcesz zmienić przynależność pojazdu (nr klienta)? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Nr klienta przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][1]))
+                                    id_k = input('Podaj nowy nr klienta: ')
+                                    if (id_k == ''):
+                                        id_k = self.result_for_update[1][0][1]
+                                else:
+                                    id_k = self.result_for_update[1][0][1]
+                                query_update = SQLQueries.tabela_samochodow_update
+                                query_updated = SQLQueries.tabela_samochodow_after_update
+                                self.query_param = (id_k, rejestracja, marka, model, id_s)
+                                self.query_param_after = (id_s)
+                                self.execute = True
+                                self.delete_temp = True
+                                self.addnew = False
+                                Admin.tabela_samochodow(self, conn, cursor, 0, query_update, query_updated)
+                            
+                            # Tabela pojazdów - usuwanie
+                            if (choice == '3'):
+                                delete_tekst = 0
+                                while(True):
+                                    if (delete_tekst):
+                                        pytanie = input('Czy chcesz usunąć kolejny pojazd?\
+                                                        \n1 - tak\
+                                                        \nb - powrót do poprzedniego menu\
+                                                        \n' + 5*'-' + '\
+                                                        \nwybierasz: ').upper()
+                                        if (pytanie == 'B'):
+                                            break
+                                    pytanie = input('Czy chcesz sprawdzić tabelę pojazdóW przed usunięciem pojazdu?\
+                                                    \n1 - tak\
+                                                    \n2 - nie\
+                                                    \n' + 5*'-' + '\
+                                                    \nb - powrót do poprzedniego menu\
+                                                    \nwybierasz: ').upper()
+                                    if (pytanie == '1'):
+                                        query = SQLQueries.tabela_samochodow
+                                        Admin.tabela_samochodow(self, conn, cursor, query, 0, 0)
+                                        sort = True
+                                        while(sort):
+                                            UserMenu.sorting(self, self.columns, self.result)
+                                            Admin.tabela_samochodow_sorted(self, self.result, self.columns)
+                                            sort = UserMenu.sortQuestion(self)                                        
+                                    if (pytanie == 'B'):
+                                        break
+                                    else:
+                                        id_pojazd = input('Podaj nr pojazdu, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
+                                        if (id_pojazd == 'B'):
+                                            break
+                                        else:
+                                            query_delete = SQLQueries.tabela_samochodow_delete
+                                            query_after_delete = SQLQueries.tabela_samochodow
+                                            self.query_param_after = (id_pojazd)
+                                            self.delete_temp = False
+                                            Admin.tabela_klientow(self, conn, cursor, 0, query_delete, query_after_delete)
+                                            delete_tekst = True
+                                            
+                                    
+                            # Tabela pojazdów - powrót
+                            elif (choice == 'B'):
+                                print('Powrót do poprzedniego menu')
+                                break
+                    
+                    # Tabela pilotów
+                    if (choice == '4'):
+                        print('Tabela pilotów TO DO')
+                    
+                    # Zarządzanie - edycja tabel - powrót
                     elif (choice == 'B'):
                         print('Powrót do poprzedniego menu')
                         break                    
             
+            # Wylogowanie
             elif (choice == 'Q'):
                 print('Zostałeś wylogowany')
                 # login(self)
@@ -557,23 +722,38 @@ class Admin:
             self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')            
         else:
             try:
-                cursor.execute(query_update, self.query_param_after)
                 if (self.delete_temp == False):
+                    cursor.execute(query_update, self.query_param_after)
                     conn.commit()
                     print('Usunąłeś klienta o numerze: ' + str(self.query_param_after))
                     print('Tabela klientów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
-                    self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')                
-                elif (self.execute):
-                    conn.commit()
-                    print('Dodałeś/zmieniłeś następującego klienta:')
-                    cursor.execute(query_updated, self.query_param_after)
-                    self.result = cursor.fetchall()
                     self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False
+            try:
+                if (self.execute):
+                    cursor.execute(query_update, self.query_param)
+                    conn.commit()
+                    print('Zmieniłeś następującego klienta:')
+                    cursor.execute(query_updated, self.query_param_after)
+                    self.result = cursor.fetchall()
+                    self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
+                    temp = True
+            
+                if (self.addnew):
+                    cursor.execute(query_update, self.query_param)
+                    conn.commit()
+                    print('Dodałeś następującego klienta:')
+                    cursor.execute(query_updated, self.query_param)
+                    self.result = cursor.fetchall()
+                    self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
+                    temp = True
+            except:
+                print('Nieoczekiwany błąd')
+                
         if (temp != False):
             table = PrintingTable.tableParameters(self, self.columns)
             PrintingTable.printingTable(self, self.result, table)        
@@ -594,29 +774,41 @@ class Admin:
         
     def tabela_samochodow(self, conn, cursor, query, query_update, query_updated):
         temp = True
+        self.columns = ('id_s', 'id_k', 'rejestracja', 'marka', 'model')
         if (query != 0):
             cursor.execute(query)
             self.result = cursor.fetchall()
             self.columns = ('id_s', 'id_k', 'rejestracja', 'marka', 'model')
         else:
             try:
-                cursor.execute(query_update, self.query_param_after)
                 if (self.delete_temp == False):
+                    cursor.execute(query_update, self.query_param_after)
                     conn.commit()
                     print('Usunąłeś samochód o numerze: ' + str(self.query_param_after))
                     print('Tabela samochodów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
-                    
-                elif (self.execute):
-                    conn.commit()
-                    print('Dodałeś/zmieniłeś następujący samochód:')
-                    cursor.execute(query_updated, self.query_param_after)
-                    self.result = cursor.fetchall()
-                    
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False
+            try:    
+                if (self.execute):
+                    cursor.execute(query_update, self.query_param)
+                    conn.commit()
+                    print('Zmieniłeś następujący pojazd:')
+                    cursor.execute(query_updated, self.query_param_after)
+                    self.result = cursor.fetchall()
+                    
+                if (self.addnew):
+                    cursor.execute(query_update, self.query_param)
+                    conn.commit()
+                    print('Dodałeś następujący pojazd:')
+                    cursor.execute(query_updated, self.query_param)
+                    self.result = cursor.fetchall()
+                    temp = True
+            except:
+                print('Nieoczekiwany błąd')
+            
         if (temp != False):
             table = PrintingTable.tableParameters(self, self.columns)
             PrintingTable.printingTable(self, self.result, table)        
