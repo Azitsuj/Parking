@@ -10,7 +10,7 @@ class User:
     
     columns = ()
     
-    def __init__(self, conn, cursor):
+    def __init__(self, cursor, conn):
         print('Jesteś w userze')
         User.panel_usera(self, conn, cursor)
     

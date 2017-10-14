@@ -262,7 +262,7 @@ class Admin:
                     if (choice == '1'):
                         while(True):
                             self.execute = False
-                            choice = input('Wszedłeś do edycji tabeli miejsc, wybierz rodzaj działania:\
+                            choiceIn = input('Wszedłeś do edycji tabeli miejsc, wybierz rodzaj działania:\
                                             \n1 - dodanie rekordu - zablokowane\
                                             \n2 - edycja rekordu\
                                             \n3 - usunięcie rekordu - zablokowane\
@@ -271,13 +271,40 @@ class Admin:
                                             \nwybierasz: ').upper()
                             
                             # Tabela miejsc - dodawanie
-                            if (choice == '1'):
+                            if (choiceIn == '1'):
                                 print('Nie można dodawać nowych miejsc! Nastąpi powrót do poprzedniego menu')
                             
                             # Tabela miejsc - edycja
-                            if (choice == '2'):
+                            if (choiceIn == '2'):
+                                query = SQLQueries.tabela_miejsc
+                                id_m_temp = Admin.status_tabele(self, conn, cursor, query)    
                                 print('W tabeli miejsc możesz edytować jedynie opis')
-                                id_m = input('Podaj numer miejsca, które chcesz edytować: ')
+                                flag = False
+                                while(True):
+                                    error = False
+                                    if (flag):
+                                        break                                    
+                                    id_m = input('Podaj numer miejsca, które chcesz edytować (aby wyjść naciśnij \'q\'): ').upper()
+                                    if id_m == 'Q':
+                                        break
+                                    try:
+                                        int(id_m)
+                                    except:
+                                        print('Podałeś zły numer, spróbuj jeszcze raz')
+                                        error = True
+                                    i = 0
+                                    while (i < len(id_m_temp) and error == False):
+                                        if int(id_m) == id_m_temp[i][0]:
+                                            flag = True
+                                            print('Numer prawidłowy')
+                                            break
+                                        else:
+                                            i += 1
+                                        if (i == len(id_m_temp)):
+                                            print('Podałeś numer spoza tabeli miejsc, spróbuj jeszcze raz')
+                                            break
+                                if id_m == 'Q':
+                                    break
                                 opis_m = input('Podaj nowy opis wybranego miejsca: ')
                                 query_update = SQLQueries.tabela_miejsc_update
                                 query_updated = SQLQueries.tabela_miejsc_after_update
@@ -286,11 +313,11 @@ class Admin:
                                 Admin.tabela_miejsc(self, conn, cursor, 0, query_update, query_updated)
                             
                             # Tabela miejsc - usuwanie
-                            if (choice == '3'):
+                            if (choiceIn == '3'):
                                 print('Nie można usuwać istniejących miejsc! Nastąpi powrót do poprzedniego menu')
                             
                             # Tabela miejsc - powrót
-                            elif (choice == 'B'):
+                            elif (choiceIn == 'B'):
                                 print('Powrót do poprzedniego menu')
                                 break
                             
@@ -298,7 +325,7 @@ class Admin:
                     if (choice == '2'):
                         while(True):
                             self.execute = False
-                            choice = input('Wszedłeś do edycji tabeli klientów, wybierz rodzaj działania:\
+                            choiceIn = input('Wszedłeś do edycji tabeli klientów, wybierz rodzaj działania:\
                                             \n1 - dodanie rekordu\
                                             \n2 - edycja rekordu\
                                             \n3 - usunięcie rekordu\
@@ -307,14 +334,26 @@ class Admin:
                                             \nwybierasz: ').upper()
                             
                             # Tabela klientów - dodawanie
-                            if (choice == '1'):
-                                imie = input('Podaj imię nowego klienta: ')
-                                nazwisko = input('Podaj nazwisko nowego klienta: ')
-                                ulica = input('Podaj ulicę nowego klienta: ')
-                                nr_budynku = input('Podaj nr budynku nowego klienta: ')
-                                nr_mieszkania = int(input('Podaj nr mieszkania nowego klienta: '))
-                                kod = input('Podaj kod pocztowy nowego klienta: ')
-                                miasto = input('Podaj miasto nowego klienta: ')
+                            if (choiceIn == '1'):
+                                imie = input('Podaj imię nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
+                                if imie == 'Q':
+                                    break
+                                nazwisko = input('Podaj nazwisko nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
+                                if nazwisko == 'Q':
+                                    break                                
+                                ulica = input('Podaj ulicę nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
+                                if ulica == 'Q':
+                                    break                                
+                                nr_budynku = input('Podaj nr budynku nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
+                                if nr_budynku == 'Q':
+                                    break                                
+                                nr_mieszkania = int(input('Podaj nr mieszkania nowego klienta'))
+                                kod = input('Podaj kod pocztowy nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
+                                if kod == 'Q':
+                                    break                                
+                                miasto = input('Podaj miasto nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
+                                if miasto == 'Q':
+                                    break                                
                                 query_update = SQLQueries.tabela_klientow_insert
                                 query_updated = SQLQueries.tabela_klientow_after_insert
                                 self.query_param = (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto)
@@ -324,83 +363,104 @@ class Admin:
                                 Admin.tabela_klientow(self, conn, cursor, 0, query_update, query_updated)
                             
                             # Tabela klientów - edycja
-                            if (choice == '2'):
+                            if (choiceIn == '2'):
                                 while(True):
-                                    id_k = int(input('Podaj id klienta, którego dane chcesz zmieniać: '))
-                                    if (id_k):
-                                        query = SQLQueries.tabela_klientow_for_update
-                                        self.query_param = (id_k)
-                                        Admin.tabela_klientow_for_update(self, conn, cursor, query)
+                                    while(True):
+                                        id_k = input('Podaj id klienta, którego dane chcesz zmieniać (aby wyjść, naciśnij \'q\'): ').upper()
+                                        if id_k == 'Q':
+                                            break
+                                        id_k = int(id_k)
+                                        if (id_k):
+                                            query = SQLQueries.tabela_klientow_for_update
+                                            self.query_param = (id_k)
+                                            Admin.tabela_klientow_for_update(self, conn, cursor, query)
+                                            break
+                                        else:
+                                            print('Podałeś złe id klienta, spróbuj ponownie')
+                                    if id_k == 'Q':
+                                        break                                    
+                                    choiceIn = input('Czy chcesz zmienić imię? \'t/n\', \'q\' aby wyjść: ').upper()
+                                    if choiceIn == 'Q':
                                         break
+                                    if(choiceIn == 'T'):
+                                        print('Imię przed zmianą: ' + str(self.result_for_update[1][0][1]))
+                                        imie = input('Podaj nowe imię (aby pominąć, wciśnij Enter): ')
+                                        if (imie == ''):
+                                            imie = self.result_for_update[1][0][1]
                                     else:
-                                        print('Podałeś złe id klienta, spróbuj ponownie')
-                                choice = input('Czy chcesz zmienić imię? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Imię przed zmianą: ' + str(self.result_for_update[1][0][1]))
-                                    imie = input('Podaj nowe imię (aby pominąć, wciśnij Enter): ')
-                                    if (imie == ''):
                                         imie = self.result_for_update[1][0][1]
-                                else:
-                                    imie = self.result_for_update[1][0][1]
-                                choice = input('Czy chcesz zmienić nazwisko? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Nazwisko przed zmianą: ' + str(self.result_for_update[1][0][2]))
-                                    nazwisko = input('Podaj nowe nazwisko (aby pominąć, wciśnij Enter): ')
-                                    if (nazwisko == ''):
+                                    choiceIn = input('Czy chcesz zmienić nazwisko? \'t/n\', \'q\' aby wyjść: ').upper()
+                                    if choiceIn == 'Q':
+                                        break
+                                    if(choiceIn == 'T'):
+                                        print('Nazwisko przed zmianą: ' + str(self.result_for_update[1][0][2]))
+                                        nazwisko = input('Podaj nowe nazwisko (aby pominąć, wciśnij Enter): ')
+                                        if (nazwisko == ''):
+                                            nazwisko = self.result_for_update[1][0][2]
+                                    else:
                                         nazwisko = self.result_for_update[1][0][2]
-                                else:
-                                    nazwisko = self.result_for_update[1][0][2]
-                                choice = input('Czy chcesz zmienić ulicę? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Ulica przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][3]))
-                                    ulica = input('Podaj nową ulicę: ')
-                                    if (ulica == ''):
+                                    choiceIn = input('Czy chcesz zmienić ulicę? \'t/n\', \'q\' aby wyjść: ').upper()
+                                    if choiceIn == 'Q':
+                                        break
+                                    if(choiceIn == 'T'):
+                                        print('Ulica przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][3]))
+                                        ulica = input('Podaj nową ulicę: ')
+                                        if (ulica == ''):
+                                            ulica = self.result_for_update[1][0][3]
+                                    else:
                                         ulica = self.result_for_update[1][0][3]
-                                else:
-                                    ulica = self.result_for_update[1][0][3]
-                                choice = input('Czy chcesz zmienić nr budynku? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Nr budynku przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][4]))
-                                    nr_budynku = input('Podaj nowy nr budynku: ')
-                                    if (nr_budynku == ''):
+                                    choiceIn = input('Czy chcesz zmienić nr budynku? \'t/n\', \'q\' aby wyjść: ').upper()
+                                    if choiceIn == 'Q':
+                                        break                                    
+                                    if(choiceIn == 'T'):
+                                        print('Nr budynku przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][4]))
+                                        nr_budynku = input('Podaj nowy nr budynku: ')
+                                        if (nr_budynku == ''):
+                                            nr_budynku = self.result_for_update[1][0][4]
+                                    else:
                                         nr_budynku = self.result_for_update[1][0][4]
-                                else:
-                                    nr_budynku = self.result_for_update[1][0][4]
-                                choice = input('Czy chcesz zmienić nr mieszkania? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Nr mieszkania przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][5]))
-                                    nr_mieszkania = int(input('Podaj nowy nr mieszkania: '))
-                                    if (nr_mieszkania == ''):
+                                    choiceIn = input('Czy chcesz zmienić nr mieszkania? \'t/n\', \'q\' aby wyjść: ').upper()
+                                    if choiceIn == 'Q':
+                                        break                                    
+                                    if(choiceIn == 'T'):
+                                        print('Nr mieszkania przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][5]))
+                                        nr_mieszkania = int(input('Podaj nowy nr mieszkania: '))
+                                        if (nr_mieszkania == ''):
+                                            nr_mieszkania = self.result_for_update[1][0][5]
+                                    else:
                                         nr_mieszkania = self.result_for_update[1][0][5]
-                                else:
-                                    nr_mieszkania = self.result_for_update[1][0][5]
-                                choice = input('Czy chcesz zmienić kod pocztowy? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Kod pocztowy przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][6]))
-                                    kod = input('Podaj nowy kod pocztowy: ')
-                                    if (kod == ''):
+                                    choiceIn = input('Czy chcesz zmienić kod pocztowy? \'t/n\', \'q\' aby wyjść: ').upper()
+                                    if choiceIn == 'Q':
+                                        break                                    
+                                    if(choiceIn == 'T'):
+                                        print('Kod pocztowy przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][6]))
+                                        kod = input('Podaj nowy kod pocztowy: ')
+                                        if (kod == ''):
+                                            kod = self.result_for_update[1][0][6]
+                                    else:
                                         kod = self.result_for_update[1][0][6]
-                                else:
-                                    kod = self.result_for_update[1][0][6]
-                                choice = input('Czy chcesz zmienić miasto? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Miasto przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][7]))
-                                    miasto = input('Podaj nowe miasto: ')
-                                    if (miasto == ''):
+                                    choiceIn = input('Czy chcesz zmienić miasto? \'t/n\', \'q\' aby wyjść: ').upper()
+                                    if choiceIn == 'Q':
+                                        break                                    
+                                    if(choiceIn == 'T'):
+                                        print('Miasto przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][7]))
+                                        miasto = input('Podaj nowe miasto: ')
+                                        if (miasto == ''):
+                                            miasto = self.result_for_update[1][0][7]
+                                    else:
                                         miasto = self.result_for_update[1][0][7]
-                                else:
-                                    miasto = self.result_for_update[1][0][7]
-                                query_update = SQLQueries.tabela_klientow_update
-                                query_updated = SQLQueries.tabela_klientow_after_update
-                                self.query_param = (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto, id_k)
-                                self.query_param_after = (id_k)
-                                self.delete_temp = True
-                                self.execute = True
-                                self.addnew = False
-                                Admin.tabela_klientow(self, conn, cursor, 0, query_update, query_updated)
+                                    query_update = SQLQueries.tabela_klientow_update
+                                    query_updated = SQLQueries.tabela_klientow_after_update
+                                    self.query_param = (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto, id_k)
+                                    self.query_param_after = (id_k)
+                                    self.delete_temp = True
+                                    self.execute = True
+                                    self.addnew = False
+                                    Admin.tabela_klientow(self, conn, cursor, 0, query_update, query_updated)
+                                    break
                             
                             # Tabela klientów - usuwanie
-                            if (choice == '3'):
+                            if (choiceIn == '3'):
                                 delete_tekst = 0
                                 while(True):
                                     if (delete_tekst):
@@ -442,7 +502,7 @@ class Admin:
                                             
                                     
                             # Tabela klientów - powrót
-                            elif (choice == 'B'):
+                            elif (choiceIn == 'B'):
                                 print('Powrót do poprzedniego menu')
                                 break
                     
@@ -894,42 +954,82 @@ class Admin:
                                                 self.addnew = True
                                                 Admin.tabela_statusow(self, conn, cursor, 0, query_update, query_updated)
                             
-                            # Tabela pilotów - edycja TO DO
+                            # Tabela statusów - edycja TO DO regexp na datę i warunki na id'ki!!!
                             if (choice == '2'):
                                 wyjscie = ''
                                 while(True):
                                     try:
-                                        id_p = int(input('Podaj nr pilota, którego numer chcesz zmienić: '))
-                                        if (id_p):
-                                            query = SQLQueries.tabela_pilotow_for_update
-                                            self.query_param = (id_p)
-                                            Admin.tabela_pilotow_for_update(self, conn, cursor, query)
+                                        id_st = int(input('Podaj nr statusu, który chcesz zmienić: '))
+                                        if (id_st):
+                                            query = SQLQueries.tabela_statusow_for_update
+                                            self.query_param = (id_st)
+                                            Admin.tabela_statusow_for_update(self, conn, cursor, query)
                                             break
                                     except:
-                                        print('Podałeś zły nr pilota, spróbuj ponownie')
+                                        print('Podałeś zły nr statusu, spróbuj ponownie')
                                         wyjscie = input('Aby wyjść, naciśnij \'q\'').upper()
                                         if wyjscie == 'Q':
                                             break
                                 if wyjscie == 'Q':
                                     break
-                                choice = input('Czy chcesz zmienić numer? \'t/n\'').upper()
+                                choice = input('Czy chcesz zmienić numer klienta? \'t/n\'').upper()
                                 if(choice == 'T'):
-                                    print('Numer przed zmianą: ' + str(self.result_for_update[1][0][1]))
-                                    nr_p = input('Podaj nowy numer (aby pominąć, wciśnij Enter): ')
-                                    if (nr_p == ''):
-                                        nr_p = self.result_for_update[1][0][1]
+                                    print('Numer klienta przed zmianą: ' + str(self.result_for_update[1][0][1]))
+                                    id_k = input('Podaj nowy numer klienta (aby pominąć, wciśnij Enter): ')
+                                    if (id_k == ''):
+                                        id_k = self.result_for_update[1][0][1]
                                 else:
-                                    nr_p = self.result_for_update[1][0][1]
-                                query_update = SQLQueries.tabela_pilotow_update
-                                query_updated = SQLQueries.tabela_pilotow_for_update
-                                self.query_param = (nr_p, id_p)
-                                self.query_param_after = (id_p)
+                                    id_k = self.result_for_update[1][0][1]
+                                choice = input('Czy chcesz zmienić numer samochodu? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Numer samochodu przed zmianą: ' + str(self.result_for_update[1][0][2]))
+                                    id_s = input('Podaj nowy numer samochodu (aby pominąć, wciśnij Enter): ')
+                                    if (id_s == ''):
+                                        id_s = self.result_for_update[1][0][2]
+                                else:
+                                    id_s= self.result_for_update[1][0][2]
+                                choice = input('Czy chcesz zmienić numer pilota? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Numer pilota przed zmianą: ' + str(self.result_for_update[1][0][3]))
+                                    id_p = input('Podaj nowy numer pilota (aby pominąć, wciśnij Enter): ')
+                                    if (id_p == ''):
+                                        id_p = self.result_for_update[1][0][3]
+                                else:
+                                    id_p = self.result_for_update[1][0][3]
+                                choice = input('Czy chcesz zmienić numer miejsca? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Numer miejsca przed zmianą: ' + str(self.result_for_update[1][0][4]))
+                                    id_m = input('Podaj nowy numer miejsca (aby pominąć, wciśnij Enter): ')
+                                    if (id_m == ''):
+                                        id_m = self.result_for_update[1][0][4]
+                                else:
+                                    id_m = self.result_for_update[1][0][4]
+                                choice = input('Czy chcesz zmienić datę początku? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Data początku przed zmianą: ' + str(self.result_for_update[1][0][5]))
+                                    data_start = input('Podaj nową datę początku (aby pominąć, wciśnij Enter): ')
+                                    if (data_start == ''):
+                                        data_start = self.result_for_update[1][0][5]
+                                else:
+                                    data_start = self.result_for_update[1][0][5]
+                                choice = input('Czy chcesz zmienić datę końca? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Data końca przed zmianą: ' + str(self.result_for_update[1][0][6]))
+                                    data_koniec = input('Podaj nową datę końca (aby pominąć, wciśnij Enter): ')
+                                    if (data_koniec == ''):
+                                        data_koniec = self.result_for_update[1][0][6]
+                                else:
+                                    data_koniec = self.result_for_update[1][0][6]
+                                query_update = SQLQueries.tabela_statusow_update
+                                query_updated = SQLQueries.tabela_statusow_for_update
+                                self.query_param = (id_k, id_s, id_p, id_m, data_start, data_koniec, id_st)
+                                self.query_param_after = (id_st)
                                 self.execute = True
                                 self.delete_temp = True
                                 self.addnew = False
-                                Admin.tabela_pilotow(self, conn, cursor, 0, query_update, query_updated)
+                                Admin.tabela_statusow(self, conn, cursor, 0, query_update, query_updated)
                             
-                            # Tabela pilotów - usuwanie
+                            # Tabela statusów - usuwanie TO DO!!!
                             if (choice == '3'):
                                 delete_tekst = 0
                                 while(True):
@@ -970,7 +1070,7 @@ class Admin:
                                             Admin.tabela_pilotow(self, conn, cursor, 0, query_delete, query_after_delete)
                                             delete_tekst = True
                                             
-                            # Tabela pilotów - powrót
+                            # Tabela statusów - powrót
                             elif (choice == 'B'):
                                 print('Powrót do poprzedniego menu')
                                 break
@@ -1092,7 +1192,7 @@ class Admin:
             cursor.execute(query_update, self.query_param)
             if (self.execute):
                 conn.commit()
-                cursor.execute(query_updated, self.query_update)
+                cursor.execute(query_updated, self.query_param)
                 self.result = cursor.fetchall()
                 self.columns = ('id_m', 'opis_m', 'slup_lewy', 'slup_prawy', 'sciana_lewa', 'sciana_prawa', 'sciana_przod', 'klatka_m')
         table = PrintingTable.tableParameters(self, self.columns)

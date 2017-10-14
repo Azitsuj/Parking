@@ -133,7 +133,57 @@ class TableHeaders:
         'wlasciciel':'<',
         'liczba_pojazdow':'^'       
     }
+
+class SQLQueries:
     
+    # zapytania usera:
+    lista_aktywnych_pojazdow = 'SELECT * FROM lista_aktywnych_pojazdow'
+    lista_miejsc = 'SELECT * FROM lista_miejsc'
+    
+    # zapytania admina:
+    lista_aktywnych_klientow = 'select * from lista_aktywnych_klientow'
+    lista_posiadaczy_pilotow = 'select * from lista_posiadaczy_pilotow'
+    lista_klientow_z_abonamentem = 'select * from lista_klientow_premium'
+    lista_miejsc_niewynajetych = 'select * from lista_miejsc_niewynajetych_bez_przeszkod'
+    lista_wszystkich_klientow = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko'
+    lista_klientow_z_nadchodzacym = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by id_m'
+    lista_klientow_duzo_samochodow = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) as liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko'
+    tabela_miejsc = 'select * from miejsce'
+    tabela_klientow = 'SELECT * FROM klient'
+    tabela_samochodow = 'SELECT * FROM samochod'
+    tabela_pilotow = 'SELECT * FROM pilot'
+    tabela_statusow = 'SELECT * FROM status'
+    tabela_statusow_friendly = 'SELECT id_st, data_start, data_koniec, klient.imie, klient.nazwisko, samochod.rejestracja, samochod.marka, samochod.model, pilot.id_p, miejsce.id_m, miejsce.opis_m FROM status JOIN klient using(id_k) JOIN samochod using(id_s) JOIN pilot using(id_p) JOIN miejsce using(id_m) ORDER BY id_st'
+    
+    # insert
+    tabela_klientow_insert = 'INSERT INTO klient (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    tabela_klientow_after_insert = 'SELECT * FROM klient WHERE imie = %s AND nazwisko = %s AND ulica = %s AND nr_budynku = %s AND nr_mieszkania = %s AND kod = %s AND miasto = %s'
+    tabela_samochodow_insert = 'INSERT INTO samochod (id_k, rejestracja, marka, model) VALUES (%s, %s, %s, %s)'
+    tabela_samochodow_after_insert = 'SELECT * FROM samochod WHERE id_k = %s AND rejestracja = %s AND marka = %s AND model = %s'
+    tabela_pilotow_insert = 'INSERT INTO pilot (nr_p) VALUES (%s)'
+    tabela_pilotow_after_insert = 'SELECT * FROM pilot WHERE nr_p = %s'
+    tabela_statusow_insert = 'INSERT INTO status (id_k, id_s, id_p, id_m, data_start, data_koniec) VALUES (%s, %s, %s, %s, %s, %s)'
+    tabela_statusow_after_insert = 'SELECT * FROM status WHERE id_k = %s AND id_s = %s AND id_p = %s AND id_m = %s AND data_start = %s AND data_koniec = %s'
+    
+    # update
+    tabela_miejsc_update = "UPDATE miejsce SET opis_m = %s WHERE id_m = %s"
+    tabela_miejsc_after_update = "SELECT * FROM miejsce WHERE opis_m = %s AND id_m = %s"
+    tabela_klientow_for_update = 'SELECT * FROM klient WHERE id_k = %s'
+    tabela_klientow_update = 'UPDATE klient SET imie = %s, nazwisko = %s, ulica = %s, nr_budynku = %s, nr_mieszkania = %s, kod = %s, miasto = %s WHERE id_k = %s'
+    tabela_klientow_after_update = 'SELECT * from klient WHERE id_k = %s'
+    tabela_samochodow_update = 'UPDATE samochod SET id_k = %s, rejestracja = %s, marka = %s, model = %s WHERE id_s = %s'
+    tabela_samochodow_after_update = 'SELECT * FROM samochod WHERE id_s = %s'
+    tabela_samochodow_for_update = 'SELECT * FROM samochod WHERE id_s = %s'
+    tabela_pilotow_for_update = 'SELECT * FROM pilot WHERE id_p = %s'
+    tabela_pilotow_update = 'UPDATE pilot SET nr_p = %s WHERE id_p = %s'
+    tabela_statusow_update = 'UPDATE status SET id_k = %s, id_s = %s, id_p = %s, id_m = %s, data_start = %s, data_koniec = %s WHERE id_st = %s'
+    tabela_statusow_for_update = 'SELECT * FROM status WHERE id_st = %s'
+    
+    # delete
+    tabela_klientow_delete = 'DELETE FROM klient WHERE id_k = %s'
+    tabela_samochodow_delete = 'DELETE FROM samochod WHERE id_s = %s'
+    tabela_pilotow_delete = 'DELETE FROM pilot WHERE id_p = %s'
+
 class PrintingTable:
     
     def tableParameters(self, columns):
@@ -282,50 +332,3 @@ class UserMenu(TableHeaders):
             sortq = False
         return sortq
             
-class SQLQueries:
-    
-    # zapytania usera:
-    lista_aktywnych_pojazdow = 'SELECT * FROM lista_aktywnych_pojazdow'
-    ista_miejsc = 'SELECT * FROM lista_miejsc'
-    
-    # zapytania admina:
-    lista_aktywnych_klientow = 'select * from lista_aktywnych_klientow'
-    lista_posiadaczy_pilotow = 'select * from lista_posiadaczy_pilotow'
-    lista_klientow_z_abonamentem = 'select * from lista_klientow_premium'
-    lista_miejsc_niewynajetych = 'select * from lista_miejsc_niewynajetych_bez_przeszkod'
-    lista_wszystkich_klientow = 'select imie, nazwisko, rejestracja, marka, model from klient join status using (id_k) join samochod using (id_s) order by nazwisko'
-    lista_klientow_z_nadchodzacym = 'select id_m as numer_miejsca, klient.imie, klient.nazwisko, samochod.rejestracja, data_start, data_koniec from miejsce join status using(id_m) join klient using (id_k) join samochod using (id_s) where curdate() < date(data_start) order by id_m'
-    lista_klientow_duzo_samochodow = 'select concat_ws(\' \',imie, nazwisko) as wlasciciel, count(rejestracja) as liczba_pojazdow from status join klient using (id_k) join samochod using (id_s) group by wlasciciel order by liczba_pojazdow desc, nazwisko'
-    tabela_miejsc = 'select * from miejsce'
-    tabela_klientow = 'SELECT * FROM klient'
-    tabela_samochodow = 'SELECT * FROM samochod'
-    tabela_pilotow = 'SELECT * FROM pilot'
-    tabela_statusow = 'SELECT * FROM status'
-    tabela_statusow_friendly = 'SELECT id_st, data_start, data_koniec, klient.imie, klient.nazwisko, samochod.rejestracja, samochod.marka, samochod.model, pilot.id_p, miejsce.id_m, miejsce.opis_m FROM status JOIN klient using(id_k) JOIN samochod using(id_s) JOIN pilot using(id_p) JOIN miejsce using(id_m) ORDER BY id_st'
-    
-    # insert
-    tabela_klientow_insert = 'INSERT INTO klient (imie, nazwisko, ulica, nr_budynku, nr_mieszkania, kod, miasto) VALUES (%s, %s, %s, %s, %s, %s, %s)'
-    tabela_klientow_after_insert = 'SELECT * FROM klient WHERE imie = %s AND nazwisko = %s AND ulica = %s AND nr_budynku = %s AND nr_mieszkania = %s AND kod = %s AND miasto = %s'
-    tabela_samochodow_insert = 'INSERT INTO samochod (id_k, rejestracja, marka, model) VALUES (%s, %s, %s, %s)'
-    tabela_samochodow_after_insert = 'SELECT * FROM samochod WHERE id_k = %s AND rejestracja = %s AND marka = %s AND model = %s'
-    tabela_pilotow_insert = 'INSERT INTO pilot (nr_p) VALUES (%s)'
-    tabela_pilotow_after_insert = 'SELECT * FROM pilot WHERE nr_p = %s'
-    tabela_statusow_insert = 'INSERT INTO status (id_k, id_s, id_p, id_m, data_start, data_koniec) VALUES (%s, %s, %s, %s, %s, %s)'
-    tabela_statusow_after_insert = 'SELECT * FROM status WHERE id_k = %s AND id_s = %s AND id_p = %s AND id_m = %s AND data_start = %s AND data_koniec = %s'
-    
-    # update
-    tabela_miejsc_update = "UPDATE miejsce SET opis_m = %s WHERE id_m = %s"
-    tabela_miejsc_after_update = "SELECT * FROM miejsce WHERE opis_m = %s AND id_m = %s"
-    tabela_klientow_for_update = 'SELECT * FROM klient WHERE id_k = %s'
-    tabela_klientow_update = 'UPDATE klient SET imie = %s, nazwisko = %s, ulica = %s, nr_budynku = %s, nr_mieszkania = %s, kod = %s, miasto = %s WHERE id_k = %s'
-    tabela_klientow_after_update = 'SELECT * from klient WHERE id_k = %s'
-    tabela_samochodow_update = 'UPDATE samochod SET id_k = %s, rejestracja = %s, marka = %s, model = %s WHERE id_s = %s'
-    tabela_samochodow_after_update = 'SELECT * FROM samochod WHERE id_s = %s'
-    tabela_samochodow_for_update = 'SELECT * FROM samochod WHERE id_s = %s'
-    tabela_pilotow_for_update = 'SELECT * FROM pilot WHERE id_p = %s'
-    tabela_pilotow_update = 'UPDATE pilot SET nr_p = %s WHERE id_p = %s'
-    
-    # delete
-    tabela_klientow_delete = 'DELETE FROM klient WHERE id_k = %s'
-    tabela_samochodow_delete = 'DELETE FROM samochod WHERE id_s = %s'
-    tabela_pilotow_delete = 'DELETE FROM pilot WHERE id_p = %s'

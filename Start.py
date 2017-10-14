@@ -20,14 +20,15 @@ class Start:
                 Admin(cursor, conn)
                 self.loggedUser = 0
             elif (self.loggedUser == 'user'):
-                User(login, cursor)
+                User(cursor, conn)
                 self.loggedUser = 0
             elif self.loggedUser == 'q':
                 close(self)
                 print('Wyszedłeś z programu')
                 break
             else:
-                print('Nie powinieneś nigdy zobaczyć tego komunikatu...')
+                close(self)
+                print('Wyszedłeś z programu')
                 break
    
 run = Start()
