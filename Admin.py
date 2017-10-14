@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pymysql
+import pymysql, re
 from Tools import ToolsAdmin, PrintingTable, UserMenu, SQLQueries
 from User import User
 from DatabaseCon import connection, close, login
@@ -421,7 +421,8 @@ class Admin:
                                         sort = True
                                         while(sort):
                                             UserMenu.sorting(self, self.columns, self.result)
-                                            Admin.tabela_klientow_sorted(self, self.result, self.columns)
+                                            if self.collist != []:
+                                                Admin.tabela_klientow_sorted(self, self.result, self.columns)
                                             sort = UserMenu.sortQuestion(self)                                        
                                     if (pytanie == 'B'):
                                         break
@@ -547,7 +548,7 @@ class Admin:
                                                         \nwybierasz: ').upper()
                                         if (pytanie == 'B'):
                                             break
-                                    pytanie = input('Czy chcesz sprawdzić tabelę pojazdóW przed usunięciem pojazdu?\
+                                    pytanie = input('Czy chcesz sprawdzić tabelę pojazdów przed usunięciem pojazdu?\
                                                     \n1 - tak\
                                                     \n2 - nie\
                                                     \n' + 5*'-' + '\
@@ -559,7 +560,8 @@ class Admin:
                                         sort = True
                                         while(sort):
                                             UserMenu.sorting(self, self.columns, self.result)
-                                            Admin.tabela_samochodow_sorted(self, self.result, self.columns)
+                                            if self.collist != []:
+                                                Admin.tabela_samochodow_sorted(self, self.result, self.columns)
                                             sort = UserMenu.sortQuestion(self)                                        
                                     if (pytanie == 'B'):
                                         break
@@ -583,12 +585,400 @@ class Admin:
                     
                     # Tabela pilotów
                     if (choice == '4'):
-                        print('Tabela pilotów TO DO')
+                        while(True):
+                            self.execute = False
+                            choice = input('Wszedłeś do edycji tabeli pilotów, wybierz rodzaj działania:\
+                                            \n1 - dodanie rekordu\
+                                            \n2 - edycja rekordu\
+                                            \n3 - usunięcie rekordu\
+                                            \n' + 5*'-' + '\
+                                            \nb - powrót do poprzedniego menu\
+                                            \nwybierasz: ').upper()
+                            
+                            # Tabela pilotow - dodanie
+                            if (choice == '1'):
+                                nr_p = input('Podaj numer nowego pilota: ')
+                                query_update = SQLQueries.tabela_pilotow_insert
+                                query_updated = SQLQueries.tabela_pilotow_after_insert
+                                self.query_param = (nr_p)
+                                self.delete_temp = True
+                                self.execute = False
+                                self.addnew = True
+                                Admin.tabela_pilotow(self, conn, cursor, 0, query_update, query_updated)
+                            
+                            # Tabela pilotów - edycja
+                            if (choice == '2'):
+                                wyjscie = ''
+                                while(True):
+                                    try:
+                                        id_p = int(input('Podaj nr pilota, którego numer chcesz zmienić: '))
+                                        if (id_p):
+                                            query = SQLQueries.tabela_pilotow_for_update
+                                            self.query_param = (id_p)
+                                            Admin.tabela_pilotow_for_update(self, conn, cursor, query)
+                                            break
+                                    except:
+                                        print('Podałeś zły nr pilota, spróbuj ponownie')
+                                        wyjscie = input('Aby wyjść, naciśnij \'q\'').upper()
+                                        if wyjscie == 'Q':
+                                            break
+                                if wyjscie == 'Q':
+                                    break
+                                choice = input('Czy chcesz zmienić numer? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Numer przed zmianą: ' + str(self.result_for_update[1][0][1]))
+                                    nr_p = input('Podaj nowy numer (aby pominąć, wciśnij Enter): ')
+                                    if (nr_p == ''):
+                                        nr_p = self.result_for_update[1][0][1]
+                                else:
+                                    nr_p = self.result_for_update[1][0][1]
+                                query_update = SQLQueries.tabela_pilotow_update
+                                query_updated = SQLQueries.tabela_pilotow_for_update
+                                self.query_param = (nr_p, id_p)
+                                self.query_param_after = (id_p)
+                                self.execute = True
+                                self.delete_temp = True
+                                self.addnew = False
+                                Admin.tabela_pilotow(self, conn, cursor, 0, query_update, query_updated)
+                            
+                            # Tabela pilotów - usuwanie
+                            if (choice == '3'):
+                                delete_tekst = 0
+                                while(True):
+                                    if (delete_tekst):
+                                        pytanie = input('Czy chcesz usunąć kolejny pilot?\
+                                                        \n1 - tak\
+                                                        \nb - powrót do poprzedniego menu\
+                                                        \n' + 5*'-' + '\
+                                                        \nwybierasz: ').upper()
+                                        if (pytanie == 'B'):
+                                            break
+                                    pytanie = input('Czy chcesz sprawdzić tabelę pilotów przed usunięciem pojazdu?\
+                                                    \n1 - tak\
+                                                    \n2 - nie\
+                                                    \n' + 5*'-' + '\
+                                                    \nb - powrót do poprzedniego menu\
+                                                    \nwybierasz: ').upper()
+                                    if (pytanie == '1'):
+                                        query = SQLQueries.tabela_pilotow
+                                        Admin.tabela_pilotow(self, conn, cursor, query, 0, 0)
+                                        sort = True
+                                        while(sort):
+                                            UserMenu.sorting(self, self.columns, self.result)
+                                            if self.collist != []:
+                                                Admin.tabela_pilotow_sorted(self, self.result, self.columns)
+                                            sort = UserMenu.sortQuestion(self)                                        
+                                    if (pytanie == 'B'):
+                                        break
+                                    else:
+                                        id_p = input('Podaj nr pilota, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
+                                        if (id_p == 'B'):
+                                            break
+                                        else:
+                                            query_delete = SQLQueries.tabela_pilotow_delete
+                                            query_after_delete = SQLQueries.tabela_pilotow
+                                            self.query_param_after = (id_p)
+                                            self.delete_temp = False
+                                            Admin.tabela_pilotow(self, conn, cursor, 0, query_delete, query_after_delete)
+                                            delete_tekst = True
+                                            
+                            # Tabela pilotów - powrót
+                            elif (choice == 'B'):
+                                print('Powrót do poprzedniego menu')
+                                break
+                    
+                    # Tabela statusów
+                    if (choice == '5'):
+                        while(True):
+                            self.execute = False
+                            choice = input('Wszedłeś do edycji tabeli pilotów, wybierz rodzaj działania:\
+                                            \n1 - dodanie rekordu\
+                                            \n2 - edycja rekordu\
+                                            \n3 - usunięcie rekordu\
+                                            \n' + 5*'-' + '\
+                                            \nb - powrót do poprzedniego menu\
+                                            \nwybierasz: ').upper()
+                            
+                            # Tabela statusów - dodanie
+                            if (choice == '1'):
+                                error = False
+                                query = SQLQueries.tabela_klientow
+                                id_k_temp = Admin.status_tabele(self, conn, cursor, query)
+                                query = SQLQueries.tabela_samochodow
+                                id_s_temp = Admin.status_tabele(self, conn, cursor, query)
+                                query = SQLQueries.tabela_pilotow
+                                id_p_temp = Admin.status_tabele(self, conn, cursor, query)
+                                query = SQLQueries.tabela_miejsc
+                                id_m_temp = Admin.status_tabele(self, conn, cursor, query)                                
+                                pytanie = input('Aby dodać status, musisz podać istniejący numer klienta, dla którego status chcesz wprowadzić. Czy chcesz sprawdzić tabelę klientów przed dodaniem statusu?\
+                                                                                \n1 - tak\
+                                                                                \n2 - nie\
+                                                                                \n' + 5*'-' + '\
+                                                                                \nb - powrót do poprzedniego menu\
+                                                                                \nwybierasz: ').upper()
+                                if (pytanie == '1'):
+                                    query = SQLQueries.tabela_klientow
+                                    Admin.tabela_klientow(self, conn, cursor, query, 0, 0)
+                                    sort = True
+                                    while(sort):
+                                        UserMenu.sorting(self, self.columns, self.result)
+                                        if self.collist != []:
+                                            Admin.tabela_klientow_sorted(self, self.result, self.columns)
+                                        sort = UserMenu.sortQuestion(self)                                        
+                                if (pytanie == 'B'):
+                                    break
+                                else:                                
+                                    flag = False
+                                    while(True):
+                                        error = False
+                                        if (flag):
+                                            break
+                                        id_k = input('Podaj numer klienta, dla którego ma być utworzony status: ')
+                                        try:
+                                            int(id_k)
+                                        except:
+                                            print('Podałeś zły numer, spróbuj jeszcze raz')
+                                            error = True
+                                        i = 0
+                                        while (i < len(id_k_temp) and error == False):
+                                            if int(id_k) == id_k_temp[i][0]:
+                                                flag = True
+                                                print('Numer prawidłowy')
+                                                break
+                                            else:
+                                                i += 1
+                                            if (i == len(id_k_temp)):
+                                                print('Podałeś numer spoza tabeli klientów, spróbuj jeszcze raz')
+                                                break
+                                    pytanie = input('Aby dodać status, musisz podać istniejący numer samochodu, dla którego status chcesz wprowadzić. Czy chcesz sprawdzić tabelę samochodów przed dodaniem statusu?\
+                                                      \n1 - tak\
+                                                      \n2 - nie\
+                                                      \n' + 5*'-' + '\
+                                                      \nb - powrót do poprzedniego menu\
+                                                      \nwybierasz: ').upper()
+                                    if (pytanie == '1'):
+                                        query = SQLQueries.tabela_samochodow
+                                        Admin.tabela_samochodow(self, conn, cursor, query, 0, 0)
+                                        sort = True
+                                        while(sort):
+                                            UserMenu.sorting(self, self.columns, self.result)
+                                            if self.collist != []:
+                                                Admin.tabela_samochodow_sorted(self, self.result, self.columns)
+                                            sort = UserMenu.sortQuestion(self)                                        
+                                    if (pytanie == 'B'):
+                                        break
+                                    else:                                
+                                        flag = False
+                                        while(True):
+                                            error = False
+                                            if (flag):
+                                                break                                            
+                                            id_s = input('Podaj numer samochodu, dla którego ma być utworzony status: ')
+                                            try:
+                                                int(id_s)
+                                            except:
+                                                print('Podałeś zły numer, spróbuj jeszcze raz')
+                                                error = True
+                                            i = 0
+                                            while (i < len(id_s_temp) and error == False):
+                                                if int(id_s) == id_s_temp[i][0]:
+                                                    flag = True
+                                                    print('Numer prawidłowy')
+                                                    break
+                                                else:
+                                                    i += 1
+                                                if (i == len(id_s_temp)):
+                                                    print('Podałeś numer spoza tabeli samochodów, spróbuj jeszcze raz')
+                                                    break
+
+                                        pytanie = input('Aby dodać status, musisz podać istniejący numer pilota, dla którego status chcesz wprowadzić. Czy chcesz sprawdzić tabelę pilotów przed dodaniem statusu?\
+                                                                                          \n1 - tak\
+                                                                                          \n2 - nie\
+                                                                                          \n' + 5*'-' + '\
+                                                                                          \nb - powrót do poprzedniego menu\
+                                                                                          \nwybierasz: ').upper()
+                                        if (pytanie == '1'):
+                                            query = SQLQueries.tabela_pilotow
+                                            Admin.tabela_pilotow(self, conn, cursor, query, 0, 0)
+                                            sort = True
+                                            while(sort):
+                                                UserMenu.sorting(self, self.columns, self.result)
+                                                if self.collist != []:
+                                                    Admin.tabela_pilotow_sorted(self, self.result, self.columns)
+                                                sort = UserMenu.sortQuestion(self)                                        
+                                        if (pytanie == 'B'):
+                                            break
+                                        else:                                
+                                            flag = False
+                                            while(True):
+                                                error = False
+                                                if (flag):
+                                                    break                                                
+                                                id_p = input('Podaj numer pilota, dla którego ma być utworzony status: ')
+                                                try:
+                                                    int(id_p)
+                                                except:
+                                                    print('Podałeś zły numer, spróbuj jeszcze raz')
+                                                    error = True
+                                                i = 0
+                                                while (i < len(id_p_temp) and error == False):
+                                                    if int(id_p) == id_p_temp[i][0]:
+                                                        flag = True
+                                                        print('Numer prawidłowy')
+                                                        break
+                                                    else:
+                                                        i += 1
+                                                    if (i == len(id_p_temp)):
+                                                        print('Podałeś numer spoza tabeli pilotów, spróbuj jeszcze raz')
+                                                        break
+                                                        
+                                            pytanie = input('Aby dodać status, musisz podać istniejący numer miejsca, dla którego status chcesz wprowadzić. Czy chcesz sprawdzić tabelę miejsc przed dodaniem statusu?\
+                                                            \n1 - tak\
+                                                            \n2 - nie\
+                                                            \n' + 5*'-' + '\
+                                                            \nb - powrót do poprzedniego menu\
+                                                            \nwybierasz: ').upper()
+                                            if (pytanie == '1'):
+                                                query = SQLQueries.tabela_miejsc
+                                                Admin.tabela_miejsc(self, conn, cursor, query, 0, 0)
+                                                sort = True
+                                                while(sort):
+                                                    UserMenu.sorting(self, self.columns, self.result)
+                                                    if self.collist != []:
+                                                        Admin.tabela_miejsc_sorted(self, self.result, self.columns)
+                                                    sort = UserMenu.sortQuestion(self)                                        
+                                            if (pytanie == 'B'):
+                                                break
+                                            else:                                
+                                                flag = False
+                                                while(True):
+                                                    error = False
+                                                    if (flag):
+                                                        break
+                                                    id_m = input('Podaj numer miejsca, dla którego ma być utworzony status: ')
+                                                    try:
+                                                        int(id_m)
+                                                    except:
+                                                        print('Podałeś zły numer, spróbuj jeszcze raz')
+                                                        error = True
+                                                    i = 0
+                                                    while (i < len(id_m_temp) and error == False):
+                                                        if int(id_m) == id_m_temp[i][0]:
+                                                            flag = True
+                                                            print('Numer prawidłowy')
+                                                            break
+                                                        else:
+                                                            i += 1
+                                                        if (i == len(id_m_temp)):
+                                                            print('Podałeś numer spoza tabeli miejsc, spróbuj jeszcze raz')
+                                                            break
+                                                while(True):                                            
+                                                    data_start = input('Podaj datę rozpoczęcia wynajmu miejsca (rrrr-mm-dd): ')
+                                                    isDate = re.match('[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]', data_start)
+                                                    if(isDate):
+                                                        break
+                                                    else:
+                                                        print('Podałeś złą datę, spróbuj jeszcze raz')
+                                                while(True):
+                                                    data_koniec = input('Podaj datę zakończenia wynajmu miejsca (rrrr-mm-dd): ')
+                                                    isDate = re.match('[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]', data_koniec)
+                                                    if(isDate):
+                                                        break
+                                                    else:
+                                                        print('Podałeś złą datę, spróbuj jeszcze raz')
+                                                query_update = SQLQueries.tabela_statusow_insert
+                                                query_updated = SQLQueries.tabela_statusow_after_insert
+                                                self.query_param = (id_k, id_s, id_p, id_m, data_start, data_koniec)
+                                                self.delete_temp = True
+                                                self.execute = False
+                                                self.addnew = True
+                                                Admin.tabela_statusow(self, conn, cursor, 0, query_update, query_updated)
+                            
+                            # Tabela pilotów - edycja TO DO
+                            if (choice == '2'):
+                                wyjscie = ''
+                                while(True):
+                                    try:
+                                        id_p = int(input('Podaj nr pilota, którego numer chcesz zmienić: '))
+                                        if (id_p):
+                                            query = SQLQueries.tabela_pilotow_for_update
+                                            self.query_param = (id_p)
+                                            Admin.tabela_pilotow_for_update(self, conn, cursor, query)
+                                            break
+                                    except:
+                                        print('Podałeś zły nr pilota, spróbuj ponownie')
+                                        wyjscie = input('Aby wyjść, naciśnij \'q\'').upper()
+                                        if wyjscie == 'Q':
+                                            break
+                                if wyjscie == 'Q':
+                                    break
+                                choice = input('Czy chcesz zmienić numer? \'t/n\'').upper()
+                                if(choice == 'T'):
+                                    print('Numer przed zmianą: ' + str(self.result_for_update[1][0][1]))
+                                    nr_p = input('Podaj nowy numer (aby pominąć, wciśnij Enter): ')
+                                    if (nr_p == ''):
+                                        nr_p = self.result_for_update[1][0][1]
+                                else:
+                                    nr_p = self.result_for_update[1][0][1]
+                                query_update = SQLQueries.tabela_pilotow_update
+                                query_updated = SQLQueries.tabela_pilotow_for_update
+                                self.query_param = (nr_p, id_p)
+                                self.query_param_after = (id_p)
+                                self.execute = True
+                                self.delete_temp = True
+                                self.addnew = False
+                                Admin.tabela_pilotow(self, conn, cursor, 0, query_update, query_updated)
+                            
+                            # Tabela pilotów - usuwanie
+                            if (choice == '3'):
+                                delete_tekst = 0
+                                while(True):
+                                    if (delete_tekst):
+                                        pytanie = input('Czy chcesz usunąć kolejny pilot?\
+                                                        \n1 - tak\
+                                                        \nb - powrót do poprzedniego menu\
+                                                        \n' + 5*'-' + '\
+                                                        \nwybierasz: ').upper()
+                                        if (pytanie == 'B'):
+                                            break
+                                    pytanie = input('Czy chcesz sprawdzić tabelę pilotów przed usunięciem pojazdu?\
+                                                    \n1 - tak\
+                                                    \n2 - nie\
+                                                    \n' + 5*'-' + '\
+                                                    \nb - powrót do poprzedniego menu\
+                                                    \nwybierasz: ').upper()
+                                    if (pytanie == '1'):
+                                        query = SQLQueries.tabela_pilotow
+                                        Admin.tabela_pilotow(self, conn, cursor, query, 0, 0)
+                                        sort = True
+                                        while(sort):
+                                            UserMenu.sorting(self, self.columns, self.result)
+                                            if self.collist != []:
+                                                Admin.tabela_pilotow_sorted(self, self.result, self.columns)
+                                            sort = UserMenu.sortQuestion(self)                                        
+                                    if (pytanie == 'B'):
+                                        break
+                                    else:
+                                        id_p = input('Podaj nr pilota, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
+                                        if (id_p == 'B'):
+                                            break
+                                        else:
+                                            query_delete = SQLQueries.tabela_pilotow_delete
+                                            query_after_delete = SQLQueries.tabela_pilotow
+                                            self.query_param_after = (id_p)
+                                            self.delete_temp = False
+                                            Admin.tabela_pilotow(self, conn, cursor, 0, query_delete, query_after_delete)
+                                            delete_tekst = True
+                                            
+                            # Tabela pilotów - powrót
+                            elif (choice == 'B'):
+                                print('Powrót do poprzedniego menu')
+                                break
                     
                     # Zarządzanie - edycja tabel - powrót
                     elif (choice == 'B'):
                         print('Powrót do poprzedniego menu')
-                        break                    
+                        break  
             
             # Wylogowanie
             elif (choice == 'Q'):
@@ -829,29 +1219,42 @@ class Admin:
         
     def tabela_pilotow(self, conn, cursor, query, query_update, query_updated):
         temp = True
+        self.columns = ('id_p', 'nr_p')
         if (query != 0):
             cursor.execute(query)
             self.result = cursor.fetchall()
-            self.columns = ('id_p', 'nr_p')
+            
         else:
             try:
-                cursor.execute(query_update, self.query_param_after)
                 if (self.delete_temp == False):
+                    cursor.execute(query_update, self.query_param_after)
                     conn.commit()
                     print('Usunąłeś pilot o numerze: ' + str(self.query_param_after))
                     print('Tabela pilotów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
-                    
-                elif (self.execute):
-                    conn.commit()
-                    print('Dodałeś/zmieniłeś następujący pilot:')
-                    cursor.execute(query_updated, self.query_param_after)
-                    self.result = cursor.fetchall()
-                    
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False
+            
+            try:
+                if (self.execute):
+                    cursor.execute(query_update, self.query_param)                    
+                    conn.commit()
+                    print('Zmieniłeś następujący pilot:')
+                    cursor.execute(query_updated, self.query_param_after)
+                    self.result = cursor.fetchall()
+                    
+                if (self.addnew):
+                    cursor.execute(query_update, self.query_param)
+                    conn.commit()
+                    print('Dodałeś następujący pilot:')
+                    cursor.execute(query_updated, self.query_param)
+                    self.result = cursor.fetchall()
+                    temp = True    
+            except:
+                print('Nieoczekiwany błąd')
+                
         if (temp != False):
             table = PrintingTable.tableParameters(self, self.columns)
             PrintingTable.printingTable(self, self.result, table)        
@@ -872,29 +1275,41 @@ class Admin:
         
     def tabela_statusow(self, conn, cursor, query, query_update, query_updated):
         temp = True
+        self.columns = ('id_st', 'id_k', 'id_s', 'id_p', 'id_m', 'data_start', 'data_koniec', 'utworzono')
         if (query != 0):
             cursor.execute(query)
             self.result = cursor.fetchall()
-            self.columns = ('id_st', 'id_k', 'id_s', 'id_p', 'id_m', 'data_start', 'data_koniec', 'utworzono')
         else:
             try:
-                cursor.execute(query_update, self.query_param_after)
                 if (self.delete_temp == False):
+                    cursor.execute(query_update, self.query_param_after)
                     conn.commit()
                     print('Usunąłeś status o numerze: ' + str(self.query_param_after))
                     print('Tabela statusów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
-                    
-                elif (self.execute):
-                    conn.commit()
-                    print('Dodałeś/zmieniłeś następujący status:')
-                    cursor.execute(query_updated, self.query_param_after)
-                    self.result = cursor.fetchall()
-                    
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False
+                
+            try:
+                if (self.execute):
+                    cursor.execute(query_update, self.query_param)
+                    conn.commit()
+                    print('Zmieniłeś następujący status:')
+                    cursor.execute(query_updated, self.query_param_after)
+                    self.result = cursor.fetchall()
+                
+                if (self.addnew):
+                    cursor.execute(query_update, self.query_param)
+                    conn.commit()
+                    print('Dodałeś następujący status:')
+                    cursor.execute(query_updated, self.query_param)
+                    self.result = cursor.fetchall()
+                    temp = True    
+            except:
+                print('Nieoczekiwany błąd')    
+            
         if (temp != False):
             table = PrintingTable.tableParameters(self, self.columns)
             PrintingTable.printingTable(self, self.result, table)
@@ -920,3 +1335,8 @@ class Admin:
         self.result_for_update = []
         self.result_for_update.append(self.columns)
         self.result_for_update.append(self.result)
+        
+    def status_tabele(self, conn, cursor, query):
+        cursor.execute(query)
+        tempResult = cursor.fetchall()
+        return tempResult

@@ -308,6 +308,10 @@ class SQLQueries:
     tabela_klientow_after_insert = 'SELECT * FROM klient WHERE imie = %s AND nazwisko = %s AND ulica = %s AND nr_budynku = %s AND nr_mieszkania = %s AND kod = %s AND miasto = %s'
     tabela_samochodow_insert = 'INSERT INTO samochod (id_k, rejestracja, marka, model) VALUES (%s, %s, %s, %s)'
     tabela_samochodow_after_insert = 'SELECT * FROM samochod WHERE id_k = %s AND rejestracja = %s AND marka = %s AND model = %s'
+    tabela_pilotow_insert = 'INSERT INTO pilot (nr_p) VALUES (%s)'
+    tabela_pilotow_after_insert = 'SELECT * FROM pilot WHERE nr_p = %s'
+    tabela_statusow_insert = 'INSERT INTO status (id_k, id_s, id_p, id_m, data_start, data_koniec) VALUES (%s, %s, %s, %s, %s, %s)'
+    tabela_statusow_after_insert = 'SELECT * FROM status WHERE id_k = %s AND id_s = %s AND id_p = %s AND id_m = %s AND data_start = %s AND data_koniec = %s'
     
     # update
     tabela_miejsc_update = "UPDATE miejsce SET opis_m = %s WHERE id_m = %s"
@@ -318,7 +322,10 @@ class SQLQueries:
     tabela_samochodow_update = 'UPDATE samochod SET id_k = %s, rejestracja = %s, marka = %s, model = %s WHERE id_s = %s'
     tabela_samochodow_after_update = 'SELECT * FROM samochod WHERE id_s = %s'
     tabela_samochodow_for_update = 'SELECT * FROM samochod WHERE id_s = %s'
+    tabela_pilotow_for_update = 'SELECT * FROM pilot WHERE id_p = %s'
+    tabela_pilotow_update = 'UPDATE pilot SET nr_p = %s WHERE id_p = %s'
     
     # delete
     tabela_klientow_delete = 'DELETE FROM klient WHERE id_k = %s'
     tabela_samochodow_delete = 'DELETE FROM samochod WHERE id_s = %s'
+    tabela_pilotow_delete = 'DELETE FROM pilot WHERE id_p = %s'
