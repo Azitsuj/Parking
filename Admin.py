@@ -364,21 +364,36 @@ class Admin:
                             
                             # Tabela klientów - edycja
                             if (choiceIn == '2'):
+                                wyjscie = ''
                                 while(True):
-                                    while(True):
-                                        id_k = input('Podaj id klienta, którego dane chcesz zmieniać (aby wyjść, naciśnij \'q\'): ').upper()
-                                        if id_k == 'Q':
+                                    try:
+                                        while(True):
+                                            id_k = input('Podaj id klienta, którego dane chcesz zmieniać (aby wyjść, naciśnij \'q\'): ').upper()
+                                            if id_k == 'Q':
+                                                break
+                                            id_k = int(id_k)
+                                            if (id_k):
+                                                query = SQLQueries.tabela_klientow_for_update
+                                                self.query_param = (id_k)
+                                                Admin.tabela_klientow_for_update(self, conn, cursor, query)
+                                                if (len(self.result) == 0):
+                                                    print('Podałeś id klienta spoza tabeli, spróbuj ponownie')
+                                                else:
+                                                    flag = True
+                                                    break
+                                        if (len(self.result) != 0):
                                             break
-                                        id_k = int(id_k)
-                                        if (id_k):
-                                            query = SQLQueries.tabela_klientow_for_update
-                                            self.query_param = (id_k)
-                                            Admin.tabela_klientow_for_update(self, conn, cursor, query)
+                                    except:
+                                        print('Podałeś złe id klienta, spróbuj ponownie')
+                                        wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
+                                        if wyjscie == 'Q':
+                                            id_k = 'Q'
+                                            flag = False
                                             break
-                                        else:
-                                            print('Podałeś złe id klienta, spróbuj ponownie')
                                     if id_k == 'Q':
+                                        flag = False
                                         break                                    
+                                while(flag):
                                     choiceIn = input('Czy chcesz zmienić imię? \'t/n\', \'q\' aby wyjść: ').upper()
                                     if choiceIn == 'Q':
                                         break
@@ -424,8 +439,9 @@ class Admin:
                                         break                                    
                                     if(choiceIn == 'T'):
                                         print('Nr mieszkania przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][5]))
-                                        nr_mieszkania = int(input('Podaj nowy nr mieszkania: '))
-                                        if (nr_mieszkania == ''):
+                                        try:
+                                            nr_mieszkania = int(input('Podaj nowy nr mieszkania: '))
+                                        except:
                                             nr_mieszkania = self.result_for_update[1][0][5]
                                     else:
                                         nr_mieszkania = self.result_for_update[1][0][5]
@@ -546,55 +562,72 @@ class Admin:
                             
                             # Tabela pojazdów - edycja
                             if (choice == '2'):
+                                flag = True
+                                wyjscie = ''
+                                query = SQLQueries.tabela_samochodow
+                                id_s_temp = Admin.status_tabele(self, conn, cursor, query)                                
                                 while(True):
-                                    id_s = int(input('Podaj nr pojazdu, którego dane chcesz zmieniać: '))
-                                    if (id_s):
-                                        query = SQLQueries.tabela_samochodow_for_update
-                                        self.query_param = (id_s)
-                                        Admin.tabela_samochodow_for_update(self, conn, cursor, query)
-                                        break
-                                    else:
+                                    try:
+                                        while(True):
+                                            id_s = int(input('Podaj nr pojazdu, którego dane chcesz zmieniać: '))
+                                            if (id_s):
+                                                query = SQLQueries.tabela_samochodow_for_update
+                                                self.query_param = (id_s)
+                                                Admin.tabela_samochodow_for_update(self, conn, cursor, query)
+                                                if (len(self.result) == 0):
+                                                    print('Podałeś nr samochodu spoza tabeli, spróbuj ponownie')
+                                                else:
+                                                    break
+                                        if (len(self.result) != 0):
+                                            break                                            
+                                    except:
                                         print('Podałeś zły nr pojazdu, spróbuj ponownie')
-                                choice = input('Czy chcesz zmienić rejestrację? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Rejestracja przed zmianą: ' + str(self.result_for_update[1][0][2]))
-                                    rejestracja = input('Podaj nową rejestrację (aby pominąć, wciśnij Enter): ')
-                                    if (rejestracja == ''):
+                                        wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
+                                        if wyjscie == 'Q':
+                                            flag = False
+                                            break
+                                while(flag):
+                                    choice = input('Czy chcesz zmienić rejestrację? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Rejestracja przed zmianą: ' + str(self.result_for_update[1][0][2]))
+                                        rejestracja = input('Podaj nową rejestrację (aby pominąć, wciśnij Enter): ')
+                                        if (rejestracja == ''):
+                                            rejestracja = self.result_for_update[1][0][2]
+                                    else:
                                         rejestracja = self.result_for_update[1][0][2]
-                                else:
-                                    rejestracja = self.result_for_update[1][0][2]
-                                choice = input('Czy chcesz markę pojazdu? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Marka pojazdu przed zmianą: ' + str(self.result_for_update[1][0][3]))
-                                    marka = input('Podaj nową markę pojazdu (aby pominąć, wciśnij Enter): ')
-                                    if (marka == ''):
+                                    choice = input('Czy chcesz markę pojazdu? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Marka pojazdu przed zmianą: ' + str(self.result_for_update[1][0][3]))
+                                        marka = input('Podaj nową markę pojazdu (aby pominąć, wciśnij Enter): ')
+                                        if (marka == ''):
+                                            marka = self.result_for_update[1][0][3]
+                                    else:
                                         marka = self.result_for_update[1][0][3]
-                                else:
-                                    marka = self.result_for_update[1][0][3]
-                                choice = input('Czy chcesz zmienić model pojazdu? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Model przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][4]))
-                                    model = input('Podaj nowy model pojazdu: ')
-                                    if (model == ''):
+                                    choice = input('Czy chcesz zmienić model pojazdu? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Model przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][4]))
+                                        model = input('Podaj nowy model pojazdu: ')
+                                        if (model == ''):
+                                            model = self.result_for_update[1][0][4]
+                                    else:
                                         model = self.result_for_update[1][0][4]
-                                else:
-                                    model = self.result_for_update[1][0][4]
-                                choice = input('Czy chcesz zmienić przynależność pojazdu (nr klienta)? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Nr klienta przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][1]))
-                                    id_k = input('Podaj nowy nr klienta: ')
-                                    if (id_k == ''):
+                                    choice = input('Czy chcesz zmienić przynależność pojazdu (nr klienta)? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Nr klienta przed zmianą (aby pominąć, wciśnij Enter): ' + str(self.result_for_update[1][0][1]))
+                                        id_k = input('Podaj nowy nr klienta: ')
+                                        if (id_k == ''):
+                                            id_k = self.result_for_update[1][0][1]
+                                    else:
                                         id_k = self.result_for_update[1][0][1]
-                                else:
-                                    id_k = self.result_for_update[1][0][1]
-                                query_update = SQLQueries.tabela_samochodow_update
-                                query_updated = SQLQueries.tabela_samochodow_after_update
-                                self.query_param = (id_k, rejestracja, marka, model, id_s)
-                                self.query_param_after = (id_s)
-                                self.execute = True
-                                self.delete_temp = True
-                                self.addnew = False
-                                Admin.tabela_samochodow(self, conn, cursor, 0, query_update, query_updated)
+                                    query_update = SQLQueries.tabela_samochodow_update
+                                    query_updated = SQLQueries.tabela_samochodow_after_update
+                                    self.query_param = (id_k, rejestracja, marka, model, id_s)
+                                    self.query_param_after = (id_s)
+                                    self.execute = True
+                                    self.delete_temp = True
+                                    self.addnew = False
+                                    Admin.tabela_samochodow(self, conn, cursor, 0, query_update, query_updated)
+                                    break
                             
                             # Tabela pojazdów - usuwanie
                             if (choice == '3'):
@@ -634,7 +667,7 @@ class Admin:
                                             query_after_delete = SQLQueries.tabela_samochodow
                                             self.query_param_after = (id_pojazd)
                                             self.delete_temp = False
-                                            Admin.tabela_klientow(self, conn, cursor, 0, query_delete, query_after_delete)
+                                            Admin.tabela_samochodow(self, conn, cursor, 0, query_delete, query_after_delete)
                                             delete_tekst = True
                                             
                                     
@@ -669,37 +702,44 @@ class Admin:
                             # Tabela pilotów - edycja
                             if (choice == '2'):
                                 wyjscie = ''
+                                flag = True
                                 while(True):
                                     try:
-                                        id_p = int(input('Podaj nr pilota, którego numer chcesz zmienić: '))
-                                        if (id_p):
-                                            query = SQLQueries.tabela_pilotow_for_update
-                                            self.query_param = (id_p)
-                                            Admin.tabela_pilotow_for_update(self, conn, cursor, query)
-                                            break
+                                        while(True):
+                                            id_p = int(input('Podaj nr pilota, którego numer chcesz zmienić: '))
+                                            if (id_p):
+                                                query = SQLQueries.tabela_pilotow_for_update
+                                                self.query_param = (id_p)
+                                                Admin.tabela_pilotow_for_update(self, conn, cursor, query)
+                                                if (len(self.result) == 0):
+                                                    print('Podałeś nr pilota spoza tabeli, spróbuj ponownie')
+                                                else:
+                                                    break
+                                        if (len(self.result) != 0):
+                                            break                                        
                                     except:
                                         print('Podałeś zły nr pilota, spróbuj ponownie')
                                         wyjscie = input('Aby wyjść, naciśnij \'q\'').upper()
                                         if wyjscie == 'Q':
+                                            flag = False
                                             break
-                                if wyjscie == 'Q':
-                                    break
-                                choice = input('Czy chcesz zmienić numer? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Numer przed zmianą: ' + str(self.result_for_update[1][0][1]))
-                                    nr_p = input('Podaj nowy numer (aby pominąć, wciśnij Enter): ')
-                                    if (nr_p == ''):
+                                while(flag):
+                                    choice = input('Czy chcesz zmienić numer? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Numer przed zmianą: ' + str(self.result_for_update[1][0][1]))
+                                        nr_p = input('Podaj nowy numer (aby pominąć, wciśnij Enter): ')
+                                        if (nr_p == ''):
+                                            nr_p = self.result_for_update[1][0][1]
+                                    else:
                                         nr_p = self.result_for_update[1][0][1]
-                                else:
-                                    nr_p = self.result_for_update[1][0][1]
-                                query_update = SQLQueries.tabela_pilotow_update
-                                query_updated = SQLQueries.tabela_pilotow_for_update
-                                self.query_param = (nr_p, id_p)
-                                self.query_param_after = (id_p)
-                                self.execute = True
-                                self.delete_temp = True
-                                self.addnew = False
-                                Admin.tabela_pilotow(self, conn, cursor, 0, query_update, query_updated)
+                                    query_update = SQLQueries.tabela_pilotow_update
+                                    query_updated = SQLQueries.tabela_pilotow_for_update
+                                    self.query_param = (nr_p, id_p)
+                                    self.query_param_after = (id_p)
+                                    self.execute = True
+                                    self.delete_temp = True
+                                    self.addnew = False
+                                    Admin.tabela_pilotow(self, conn, cursor, 0, query_update, query_updated)
                             
                             # Tabela pilotów - usuwanie
                             if (choice == '3'):
@@ -751,7 +791,7 @@ class Admin:
                     if (choice == '5'):
                         while(True):
                             self.execute = False
-                            choice = input('Wszedłeś do edycji tabeli pilotów, wybierz rodzaj działania:\
+                            choice = input('Wszedłeś do edycji tabeli statusów, wybierz rodzaj działania:\
                                             \n1 - dodanie rekordu\
                                             \n2 - edycja rekordu\
                                             \n3 - usunięcie rekordu\
@@ -954,70 +994,203 @@ class Admin:
                                                 self.addnew = True
                                                 Admin.tabela_statusow(self, conn, cursor, 0, query_update, query_updated)
                             
-                            # Tabela statusów - edycja TO DO regexp na datę i warunki na id'ki!!!
+                            # Tabela statusów - edycja
                             if (choice == '2'):
                                 wyjscie = ''
+                                query = SQLQueries.tabela_klientow
+                                id_k_temp = Admin.status_tabele(self, conn, cursor, query)
+                                query = SQLQueries.tabela_samochodow
+                                id_s_temp = Admin.status_tabele(self, conn, cursor, query)
+                                query = SQLQueries.tabela_pilotow
+                                id_p_temp = Admin.status_tabele(self, conn, cursor, query)
+                                query = SQLQueries.tabela_miejsc
+                                id_m_temp = Admin.status_tabele(self, conn, cursor, query)
                                 while(True):
                                     try:
-                                        id_st = int(input('Podaj nr statusu, który chcesz zmienić: '))
-                                        if (id_st):
-                                            query = SQLQueries.tabela_statusow_for_update
-                                            self.query_param = (id_st)
-                                            Admin.tabela_statusow_for_update(self, conn, cursor, query)
+                                        while(True):
+                                            id_st = int(input('Podaj nr statusu, który chcesz zmienić: '))
+                                            if (id_st):
+                                                query = SQLQueries.tabela_statusow_for_update
+                                                self.query_param = (id_st)
+                                                Admin.tabela_statusow_for_update(self, conn, cursor, query)
+                                                if (len(self.result) == 0):
+                                                    print('Podałeś nr statusu spoza tabeli, spróbuj ponownie')
+                                                else:
+                                                    break
+                                        if (len(self.result) != 0):
                                             break
                                     except:
                                         print('Podałeś zły nr statusu, spróbuj ponownie')
-                                        wyjscie = input('Aby wyjść, naciśnij \'q\'').upper()
+                                        wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować').upper()
                                         if wyjscie == 'Q':
                                             break
                                 if wyjscie == 'Q':
                                     break
-                                choice = input('Czy chcesz zmienić numer klienta? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Numer klienta przed zmianą: ' + str(self.result_for_update[1][0][1]))
-                                    id_k = input('Podaj nowy numer klienta (aby pominąć, wciśnij Enter): ')
-                                    if (id_k == ''):
+                                # Edycja numeru klienta
+                                flag = False
+                                while(True):
+                                    error = False
+                                    if(flag):
+                                        break
+                                    choice = input('Czy chcesz zmienić numer klienta? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Numer klienta przed zmianą: ' + str(self.result_for_update[1][0][1]))
+                                        id_k = input('Podaj nowy numer klienta (aby pominąć, wciśnij Enter): ')
+                                        if (id_k == ''):
+                                            id_k = self.result_for_update[1][0][1]
+                                            flag = True
+                                            break
+                                        elif (id_k != ''):
+                                            try:
+                                                int(id_k)
+                                            except:
+                                                print('Podałeś zły numer, spróbuj jeszcze raz')
+                                                error = True
+                                            i = 0
+                                            while (i < len(id_k_temp) and error == False):
+                                                if int(id_k) == id_k_temp[i][0]:
+                                                    flag = True
+                                                    print('Numer prawidłowy')
+                                                    break
+                                                else:
+                                                    i += 1
+                                                if (i == len(id_k_temp)):
+                                                    print('Podałeś numer spoza tabeli klientów, spróbuj jeszcze raz')
+                                                    break
+                                    else:
                                         id_k = self.result_for_update[1][0][1]
-                                else:
-                                    id_k = self.result_for_update[1][0][1]
-                                choice = input('Czy chcesz zmienić numer samochodu? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Numer samochodu przed zmianą: ' + str(self.result_for_update[1][0][2]))
-                                    id_s = input('Podaj nowy numer samochodu (aby pominąć, wciśnij Enter): ')
-                                    if (id_s == ''):
-                                        id_s = self.result_for_update[1][0][2]
-                                else:
-                                    id_s= self.result_for_update[1][0][2]
-                                choice = input('Czy chcesz zmienić numer pilota? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Numer pilota przed zmianą: ' + str(self.result_for_update[1][0][3]))
-                                    id_p = input('Podaj nowy numer pilota (aby pominąć, wciśnij Enter): ')
-                                    if (id_p == ''):
+                                        break
+                                # Edycja numeru samochodu
+                                flag = False
+                                while(True):
+                                    error = False
+                                    if(flag):
+                                        break
+                                    choice = input('Czy chcesz zmienić numer samochodu? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Numer samochodu przed zmianą: ' + str(self.result_for_update[1][0][2]))
+                                        id_s = input('Podaj nowy numer samochodu (aby pominąć, wciśnij Enter): ')
+                                        if (id_s == ''):
+                                            id_s = self.result_for_update[1][0][2]
+                                            flag = True
+                                            break
+                                        elif (id_s != ''):
+                                            try:
+                                                int(id_s)
+                                            except:
+                                                print('Podałeś zły numer, spróbuj jeszcze raz')
+                                                error = True
+                                            i = 0
+                                            while (i < len(id_s_temp) and error == False):
+                                                if int(id_s) == id_s_temp[i][0]:
+                                                    flag = True
+                                                    print('Numer prawidłowy')
+                                                    break
+                                                else:
+                                                    i += 1
+                                                if (i == len(id_s_temp)):
+                                                    print('Podałeś numer spoza tabeli samochodów, spróbuj jeszcze raz')
+                                                    break
+                                    else:
+                                        id_s= self.result_for_update[1][0][2]
+                                        break
+                                # Edycja numeru pilota
+                                flag = False
+                                while(True):
+                                    error = False
+                                    if(flag):
+                                        break
+                                    choice = input('Czy chcesz zmienić numer pilota? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Numer pilota przed zmianą: ' + str(self.result_for_update[1][0][3]))
+                                        id_p = input('Podaj nowy numer pilota (aby pominąć, wciśnij Enter): ')
+                                        if (id_p == ''):
+                                            id_p = self.result_for_update[1][0][3]
+                                            flag = True
+                                            break
+                                        elif (id_p != ''):
+                                            try:
+                                                int(id_p)
+                                            except:
+                                                print('Podałeś zły numer, spróbuj jeszcze raz')
+                                                error = True
+                                            i = 0
+                                            while (i < len(id_p_temp) and error == False):
+                                                if int(id_p) == id_p_temp[i][0]:
+                                                    flag = True
+                                                    print('Numer prawidłowy')
+                                                    break
+                                                else:
+                                                    i += 1
+                                                if (i == len(id_p_temp)):
+                                                    print('Podałeś numer spoza tabeli pilotów, spróbuj jeszcze raz')
+                                                    break
+                                    else:
                                         id_p = self.result_for_update[1][0][3]
-                                else:
-                                    id_p = self.result_for_update[1][0][3]
-                                choice = input('Czy chcesz zmienić numer miejsca? \'t/n\'').upper()
-                                if(choice == 'T'):
-                                    print('Numer miejsca przed zmianą: ' + str(self.result_for_update[1][0][4]))
-                                    id_m = input('Podaj nowy numer miejsca (aby pominąć, wciśnij Enter): ')
-                                    if (id_m == ''):
+                                        break
+                                # Edycja numeru miejsca
+                                flag = False
+                                while(True):
+                                    error = False
+                                    if(flag):
+                                        break
+                                    choice = input('Czy chcesz zmienić numer miejsca? \'t/n\'').upper()
+                                    if(choice == 'T'):
+                                        print('Numer miejsca przed zmianą: ' + str(self.result_for_update[1][0][4]))
+                                        id_m = input('Podaj nowy numer miejsca (aby pominąć, wciśnij Enter): ')
+                                        if (id_m == ''):
+                                            id_m = self.result_for_update[1][0][4]
+                                        elif (id_m != ''):
+                                            try:
+                                                int(id_m)
+                                            except:
+                                                print('Podałeś zły numer, spróbuj jeszcze raz')
+                                                error = True
+                                            i = 0
+                                            while (i < len(id_m_temp) and error == False):
+                                                if int(id_m) == id_m_temp[i][0]:
+                                                    flag = True
+                                                    print('Numer prawidłowy')
+                                                    break
+                                                else:
+                                                    i += 1
+                                                if (i == len(id_m_temp)):
+                                                    print('Podałeś numer spoza tabeli miejsc, spróbuj jeszcze raz')
+                                                    break
+                                    else:
                                         id_m = self.result_for_update[1][0][4]
-                                else:
-                                    id_m = self.result_for_update[1][0][4]
+                                        break
+                                # Edycja początkowej daty
                                 choice = input('Czy chcesz zmienić datę początku? \'t/n\'').upper()
                                 if(choice == 'T'):
                                     print('Data początku przed zmianą: ' + str(self.result_for_update[1][0][5]))
-                                    data_start = input('Podaj nową datę początku (aby pominąć, wciśnij Enter): ')
-                                    if (data_start == ''):
-                                        data_start = self.result_for_update[1][0][5]
+                                    while(True):
+                                        data_start = input('Podaj nową datę początku (rrrr-mm-dd) (aby pominąć, wciśnij Enter): ')
+                                        if (data_start == ''):
+                                            data_start = self.result_for_update[1][0][5]
+                                            break 
+                                        isDate = re.match('[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]', data_start)
+                                        if(isDate):
+                                            break
+                                        else:
+                                            print('Podałeś złą datę, spróbuj jeszcze raz')
+                                        
                                 else:
                                     data_start = self.result_for_update[1][0][5]
+                                # Edycja końcowej daty
                                 choice = input('Czy chcesz zmienić datę końca? \'t/n\'').upper()
                                 if(choice == 'T'):
                                     print('Data końca przed zmianą: ' + str(self.result_for_update[1][0][6]))
-                                    data_koniec = input('Podaj nową datę końca (aby pominąć, wciśnij Enter): ')
-                                    if (data_koniec == ''):
-                                        data_koniec = self.result_for_update[1][0][6]
+                                    while(True):
+                                        data_koniec = input('Podaj nową datę końca (rrrr-mm-dd) (aby pominąć, wciśnij Enter): ')
+                                        if (data_koniec == ''):
+                                            data_koniec = self.result_for_update[1][0][6]
+                                            break
+                                        isDate = re.match('[1-2][0-9]{3}-[0-1][0-9]-[0-3][0-9]', data_koniec)
+                                        if(isDate):
+                                            break
+                                        else:
+                                            print('Podałeś złą datę, spróbuj jeszcze raz')
                                 else:
                                     data_koniec = self.result_for_update[1][0][6]
                                 query_update = SQLQueries.tabela_statusow_update
@@ -1029,45 +1202,45 @@ class Admin:
                                 self.addnew = False
                                 Admin.tabela_statusow(self, conn, cursor, 0, query_update, query_updated)
                             
-                            # Tabela statusów - usuwanie TO DO!!!
+                            # Tabela statusów - usuwanie
                             if (choice == '3'):
                                 delete_tekst = 0
                                 while(True):
                                     if (delete_tekst):
-                                        pytanie = input('Czy chcesz usunąć kolejny pilot?\
+                                        pytanie = input('Czy chcesz usunąć kolejny status?\
                                                         \n1 - tak\
                                                         \nb - powrót do poprzedniego menu\
                                                         \n' + 5*'-' + '\
                                                         \nwybierasz: ').upper()
                                         if (pytanie == 'B'):
                                             break
-                                    pytanie = input('Czy chcesz sprawdzić tabelę pilotów przed usunięciem pojazdu?\
+                                    pytanie = input('Czy chcesz sprawdzić tabelę statusów przed usunięciem statusu?\
                                                     \n1 - tak\
                                                     \n2 - nie\
                                                     \n' + 5*'-' + '\
                                                     \nb - powrót do poprzedniego menu\
                                                     \nwybierasz: ').upper()
                                     if (pytanie == '1'):
-                                        query = SQLQueries.tabela_pilotow
-                                        Admin.tabela_pilotow(self, conn, cursor, query, 0, 0)
+                                        query = SQLQueries.tabela_statusow
+                                        Admin.tabela_statusow(self, conn, cursor, query, 0, 0)
                                         sort = True
                                         while(sort):
                                             UserMenu.sorting(self, self.columns, self.result)
                                             if self.collist != []:
-                                                Admin.tabela_pilotow_sorted(self, self.result, self.columns)
+                                                Admin.tabela_statusow_sorted(self, self.result, self.columns)
                                             sort = UserMenu.sortQuestion(self)                                        
                                     if (pytanie == 'B'):
                                         break
                                     else:
-                                        id_p = input('Podaj nr pilota, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
-                                        if (id_p == 'B'):
+                                        id_st = input('Podaj nr statusu, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
+                                        if (id_st == 'B'):
                                             break
                                         else:
-                                            query_delete = SQLQueries.tabela_pilotow_delete
-                                            query_after_delete = SQLQueries.tabela_pilotow
-                                            self.query_param_after = (id_p)
+                                            query_delete = SQLQueries.tabela_statusow_delete
+                                            query_after_delete = SQLQueries.tabela_statusow
+                                            self.query_param_after = (id_st)
                                             self.delete_temp = False
-                                            Admin.tabela_pilotow(self, conn, cursor, 0, query_delete, query_after_delete)
+                                            Admin.tabela_statusow(self, conn, cursor, 0, query_delete, query_after_delete)
                                             delete_tekst = True
                                             
                             # Tabela statusów - powrót
@@ -1184,17 +1357,16 @@ class Admin:
         PrintingTable.printingTable(self, self.result, table)
         
     def tabela_miejsc(self, conn, cursor, query, query_update, query_updated):
+        self.columns = ('id_m', 'opis_m', 'slup_lewy', 'slup_prawy', 'sciana_lewa', 'sciana_prawa', 'sciana_przod', 'klatka_m')
         if (query != 0):
             cursor.execute(query)
             self.result = cursor.fetchall()
-            self.columns = ('id_m', 'opis_m', 'slup_lewy', 'slup_prawy', 'sciana_lewa', 'sciana_prawa', 'sciana_przod', 'klatka_m')            
         else:
             cursor.execute(query_update, self.query_param)
             if (self.execute):
                 conn.commit()
                 cursor.execute(query_updated, self.query_param)
                 self.result = cursor.fetchall()
-                self.columns = ('id_m', 'opis_m', 'slup_lewy', 'slup_prawy', 'sciana_lewa', 'sciana_prawa', 'sciana_przod', 'klatka_m')
         table = PrintingTable.tableParameters(self, self.columns)
         PrintingTable.printingTable(self, self.result, table)
         return self.columns    
@@ -1206,10 +1378,10 @@ class Admin:
         
     def tabela_klientow(self, conn, cursor, query, query_update, query_updated):
         temp = True
+        self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
         if (query != 0):
             cursor.execute(query)
             self.result = cursor.fetchall()
-            self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')            
         else:
             try:
                 if (self.delete_temp == False):
@@ -1219,7 +1391,8 @@ class Admin:
                     print('Tabela klientów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
-                    self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
+                    self.execute = False
+                    self.addnew = False                    
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False
@@ -1230,7 +1403,6 @@ class Admin:
                     print('Zmieniłeś następującego klienta:')
                     cursor.execute(query_updated, self.query_param_after)
                     self.result = cursor.fetchall()
-                    self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
                     temp = True
             
                 if (self.addnew):
@@ -1239,7 +1411,6 @@ class Admin:
                     print('Dodałeś następującego klienta:')
                     cursor.execute(query_updated, self.query_param)
                     self.result = cursor.fetchall()
-                    self.columns = ('id_k', 'imie', 'nazwisko', 'ulica', 'nr_budynku', 'nr_mieszkania', 'kod', 'miasto')
                     temp = True
             except:
                 print('Nieoczekiwany błąd')
@@ -1278,6 +1449,8 @@ class Admin:
                     print('Tabela samochodów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
+                    self.execute = False
+                    self.addnew = False                    
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False
@@ -1333,6 +1506,8 @@ class Admin:
                     print('Tabela pilotów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
+                    self.execute = False
+                    self.addnew = False                    
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False
@@ -1388,6 +1563,8 @@ class Admin:
                     print('Tabela statusów po usunięciu wygląda następująco:')
                     cursor.execute(query_updated)
                     self.result = cursor.fetchall()
+                    self.execute = False
+                    self.addnew = False
             except:
                 print('Nie możesz usunąć tego rekordu, spróbuj ponownie z innym lub najpierw usuń odwołania do niego w innych tabelach')
                 temp = False

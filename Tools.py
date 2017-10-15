@@ -183,6 +183,7 @@ class SQLQueries:
     tabela_klientow_delete = 'DELETE FROM klient WHERE id_k = %s'
     tabela_samochodow_delete = 'DELETE FROM samochod WHERE id_s = %s'
     tabela_pilotow_delete = 'DELETE FROM pilot WHERE id_p = %s'
+    tabela_statusow_delete = 'DELETE FROM status WHERE id_st = %s'
 
 class PrintingTable:
     
