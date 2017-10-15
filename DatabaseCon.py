@@ -26,15 +26,15 @@ def login(self):
     i = 0
     while(i < 3):
         # temp user selecting
-        
+        '''
         while(True):
             logtemp = input('Podaj login: 1 - admin, 2 - user, q - wyjście: ')
             if (logtemp == '1'):
-                self.loggedUser = 'admin'
+                self.loggedUser = 'owner'
                 pwd = 'admin'
                 break
             elif (logtemp == '2'):
-                self.loggedUser = 'user'
+                self.loggedUser = 'ochroniarz'
                 pwd = 'user'
                 break
             elif (logtemp == 'q'):
@@ -42,33 +42,40 @@ def login(self):
             else:
                 print('Coś poszło nie tak, spróbuj ponownie')
         if logtemp == 'q':
-            self.loggedUser = 'q'
+            RS = (('q'))
             break
         # Koniec tymczasowego logowania
         '''
         self.loggedUser = input('Podaj login (\'q\' aby wyjść): ')
         if self.loggedUser.upper() == 'Q':
-            print('Wyszedłeś z programu.')
+            print('Wychodzisz z programu.')
+            RS = 'q'
             break
         pwd = pyssword()
-        '''
+        
         # pwd = input('Podaj hasło: ')
         pwd2 = encrypt(self, pwd)
         pwd3 = str(pwd2)
         pwd4 = len(pwd3) - 1
         passwd = pwd3[:1] + '\'' + pwd3[2:pwd4] + '\''
-        self.cursor.execute('SELECT login, passwd FROM login WHERE login = %s and passwd = %s', (self.loggedUser, passwd))
+        self.cursor.execute('SELECT role FROM login WHERE login = %s and passwd = %s', (self.loggedUser, passwd))
         RS = self.cursor.fetchall()
         if (len(RS) != 0):
+            RS = str(RS[0][0][:len(RS[0][0])-1])
             print('Logowanie pomyślne!')
             break
         else:
             print('Błąd logowania')
             i += 1
+            if i == 1:
+                print('Masz jeszcze ' + str(3 - i) + ' próby')
+            elif i == 2:
+                print('Masz jeszcze ' + str(3 - i) + ' próbę')
             if (i == 3):
                 print('Przekroczyłeś liczbę prób! Program zostanie zamknięty')
+                RS = 'q'
                 break       
-    return self.loggedUser
+    return RS
 
 def encrypt(self, haslo):
     haslob = bytes(haslo, 'utf-8')

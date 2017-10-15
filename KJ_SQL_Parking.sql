@@ -13,7 +13,8 @@ grant select, insert, delete, update on parking.* to 'x'@'localhost' identified 
 create table login (
 	id int primary key auto_increment,
     login varchar(20),
-    passwd varchar(131)
+    passwd varchar(131),
+    role varchar(10)
 );
 
 create table miejsce (

@@ -5,24 +5,26 @@ from DatabaseCon import connection, close, login
 
 class Start:
     
+    RS = 0
+    
     def __init__(self):
         print('Witaj w programie \"Parking\"!')
         connection(self)
         print('Za chwilę będziesz mógł się zalogować')
-        login(self)
-        Start.startSelector(self, self.loggedUser, self.cursor, self.conn)
+        RS = login(self)
+        Start.startSelector(self, RS, self.cursor, self.conn)
     
-    def startSelector(self, loggedUser, cursor, conn):
+    def startSelector(self, RS, cursor, conn):
         while(True):
-            if self.loggedUser == 0:
-                login(self)  
-            elif (self.loggedUser == 'admin'):
+            if RS == 0:
+                RS = login(self)  
+            elif (RS == 'admin'):
                 Admin(cursor, conn)
-                self.loggedUser = 0
-            elif (self.loggedUser == 'user'):
+                RS = 0
+            elif (RS == 'user'):
                 User(cursor, conn)
-                self.loggedUser = 0
-            elif self.loggedUser == 'q':
+                RS = 0
+            elif RS == 'q':
                 close(self)
                 print('Wyszedłeś z programu')
                 break
