@@ -5,9 +5,9 @@ Przed uruchomieniem programu należy:
 Aby uruchomić program, należy zainicjować klasę 'Start'.
 Po uruchomieniu, aby zalogować się wewnątrz programu, należy podać następujące dane:
 1. Jako admin:
-	login:	owner
-	passwd: admin
+1.1. login:	owner
+1.2. passwd: admin
 2. Jako user:
-	login:	ochroniarz
-	passwd: user
+2.1. login:	ochroniarz
+2.2. passwd: user
 Następnie należy postępować zgodnie ze wskazówkami na ekranie.
