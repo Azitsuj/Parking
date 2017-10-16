@@ -7,7 +7,7 @@ from msvcrt import getch
 def connection(self):
     while(True):
         try:
-            self.conn = pymysql.connect('localhost', 'x', 'strongPasswordWouldBeNice', 'parking', charset='utf8')
+            self.conn = pymysql.connect('localhost', 'KJ_parking_python', 'strongPasswordWouldBeNice', 'parking', charset='utf8')
             print('Połączenie z bazą zostało utworzone')
             break
         except:

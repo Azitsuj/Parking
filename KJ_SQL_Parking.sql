@@ -5,9 +5,9 @@ create database parking;
 use parking;
 
 -- tworzy uzytkownika na potrzeby Pythona
-drop user if exists python;
-create user python identified by 'strongPasswordWouldBeNice';
-grant select, insert, delete, update on parking.* to 'x'@'localhost' identified by 'strongPasswordWouldBeNice';
+drop user if exists KJ_parking_python;
+create user KJ_parking_python identified by 'strongPasswordWouldBeNice';
+grant select, insert, delete, update on parking.* to 'KJ_parking_python'@'localhost' identified by 'strongPasswordWouldBeNice';
 
 -- tworzenie tabel
 create table login (

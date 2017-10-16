@@ -347,7 +347,12 @@ class Admin:
                                 nr_budynku = input('Podaj nr budynku nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
                                 if nr_budynku == 'Q':
                                     break                                
-                                nr_mieszkania = int(input('Podaj nr mieszkania nowego klienta'))
+                                while(True):
+                                    try:
+                                        nr_mieszkania = int(input('Podaj nr mieszkania nowego klienta: '))
+                                        break
+                                    except:
+                                        print('Podałeś niewłaściwy numer - nie jest liczbą całkowitą, spróbuj jeszcze raz')
                                 kod = input('Podaj kod pocztowy nowego klienta (naciśnij \'q\' aby wyjść): ').upper()
                                 if kod == 'Q':
                                     break                                
@@ -503,9 +508,31 @@ class Admin:
                                     if (pytanie == 'B'):
                                         break
                                     else:
-                                        id_klient = input('Podaj id klienta, którego chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
-                                        if (id_klient == 'B'):
-                                            break
+                                        while(True):
+                                            try:
+                                                while(True):
+                                                    id_klient = input('Podaj id klienta, którego chcesz usunąć (aby wyjść, naciśnij \'q\'): ').upper()
+                                                    if id_klient == 'Q':
+                                                        break
+                                                    id_klient = int(id_klient)
+                                                    if (id_klient):
+                                                        query = SQLQueries.tabela_klientow_for_update
+                                                        self.query_param = (id_klient)
+                                                        Admin.tabela_klientow_for_update(self, conn, cursor, query)
+                                                        if (len(self.result) == 0):
+                                                            print('Podałeś id klienta spoza tabeli, spróbuj ponownie')
+                                                        else:
+                                                            break
+                                                if (len(self.result) != 0):
+                                                    break
+                                            except:
+                                                print('Podałeś złe id klienta, spróbuj ponownie')
+                                                wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
+                                            if wyjscie == 'Q':
+                                                id_klient = 'Q'
+                                                break
+                                        if id_klient == 'Q':
+                                            break            
                                         else:
                                             query_delete = SQLQueries.tabela_klientow_delete
                                             query_after_delete = SQLQueries.tabela_klientow
@@ -535,30 +562,61 @@ class Admin:
                                             \nwybierasz: ').upper()
                             # Tabela pojazdów - dodanie
                             if (choice == '1'):
-                                rejestracja = input('Podaj numer rejestracji nowego pojazdu: ')
-                                marka = input('Podaj markę nowego pojazdu: ')
-                                model = input('Podaj model nowego pojazdu: ')
-                                self.pojazd = input('Czy chcesz sprawdzić tabelę klientów przed podaniem nr klienta dla wprowadzanego pojazdu? \'t/n\': ').upper()
-                                if (self.pojazd == 'T'):
-                                    query = SQLQueries.tabela_klientow
-                                    Admin.tabela_klientow(self, conn, cursor, query, 0, 0)
-                                    sort = True
-                                    while(sort):
-                                        UserMenu.sorting(self, self.columns, self.result)
-                                        if (self.collist != []):
-                                            Admin.tabela_klientow_sorted(self, self.result, self.columns)
-                                            sort = UserMenu.sortQuestion(self)
-                                        else:
-                                            print('Kontynuujesz wprowadzanie nowego pojazdu')
-                                            break
-                                id_k = input('Podaj nr klienta, do którego należy pojazd: ')
-                                query_update = SQLQueries.tabela_samochodow_insert
-                                query_updated = SQLQueries.tabela_samochodow_after_insert
-                                self.query_param = (id_k, rejestracja, marka, model)
-                                self.delete_temp = True
-                                self.execute = False
-                                self.addnew = True
-                                Admin.tabela_samochodow(self, conn, cursor, 0, query_update, query_updated)
+                                while(True):
+                                    rejestracja = input('Podaj numer rejestracji nowego pojazdu lub wciśnij \'q\' aby powrócić do poprzedniego menu: ')
+                                    if rejestracja.upper() == 'Q':
+                                        break
+                                    marka = input('Podaj markę nowego pojazdu lub wciśnij \'q\' aby powrócić do poprzedniego menu: ')
+                                    if marka.upper() == 'Q':
+                                        break                                    
+                                    model = input('Podaj model nowego pojazdu lub wciśnij \'q\' aby powrócić do poprzedniego menu: ')
+                                    if model.upper() == 'Q':
+                                        break                                    
+                                    self.pojazd = input('Czy chcesz sprawdzić tabelę klientów przed podaniem nr klienta dla wprowadzanego pojazdu? \'t/n\': ').upper()
+                                    if (self.pojazd == 'T'):
+                                        query = SQLQueries.tabela_klientow
+                                        Admin.tabela_klientow(self, conn, cursor, query, 0, 0)
+                                        sort = True
+                                        while(sort):
+                                            UserMenu.sorting(self, self.columns, self.result)
+                                            if (self.collist != []):
+                                                Admin.tabela_klientow_sorted(self, self.result, self.columns)
+                                                sort = UserMenu.sortQuestion(self)
+                                            else:
+                                                print('Kontynuujesz wprowadzanie nowego pojazdu')
+                                                break
+                                    while(True):
+                                        try:
+                                            while(True):
+                                                id_k = input('Podaj nr klienta, do którego należy pojazd lub wciśnij \'q\' aby powrócić do poprzedniego menu: ')
+                                                if id_k.upper() == 'Q':
+                                                            break
+                                                id_k = int(id_k)
+                                                if (id_k):
+                                                    query = SQLQueries.tabela_klientow_for_update
+                                                    self.query_param = (id_k)
+                                                    Admin.tabela_samochodow_for_update(self, conn, cursor, query)
+                                                    if (len(self.result) == 0):
+                                                        print('Podałeś nr klienta spoza tabeli, spróbuj ponownie')
+                                                    else:
+                                                        break
+                                            if (len(self.result) != 0):
+                                                break                                            
+                                        except:
+                                            print('Podałeś zły nr klienta, spróbuj ponownie')
+                                            wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
+                                            if wyjscie == 'Q':
+                                                break
+                                    if wyjscie == 'Q':
+                                        break
+                                    query_update = SQLQueries.tabela_samochodow_insert
+                                    query_updated = SQLQueries.tabela_samochodow_after_insert
+                                    self.query_param = (id_k, rejestracja, marka, model)
+                                    self.delete_temp = True
+                                    self.execute = False
+                                    self.addnew = True
+                                    Admin.tabela_samochodow(self, conn, cursor, 0, query_update, query_updated)
+                                    break
                             
                             # Tabela pojazdów - edycja
                             if (choice == '2'):
@@ -659,9 +717,30 @@ class Admin:
                                     if (pytanie == 'B'):
                                         break
                                     else:
-                                        id_pojazd = input('Podaj nr pojazdu, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
-                                        if (id_pojazd == 'B'):
-                                            break
+                                        while(True):
+                                            try:
+                                                while(True):
+                                                    id_pojazd = input('Podaj nr pojazdu, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
+                                                    id_pojazd = int(id_pojazd)
+                                                    if (id_pojazd == 'B'):
+                                                        break                                                    
+                                                    if (id_pojazd):
+                                                        query = SQLQueries.tabela_samochodow_for_update
+                                                        self.query_param = (id_pojazd)
+                                                        Admin.tabela_samochodow_for_update(self, conn, cursor, query)
+                                                        if (len(self.result) == 0):
+                                                            print('Podałeś nr samochodu spoza tabeli, spróbuj ponownie')
+                                                        else:
+                                                            break
+                                                if (len(self.result) != 0):
+                                                    break                                            
+                                            except:
+                                                print('Podałeś zły nr pojazdu, spróbuj ponownie')
+                                                wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
+                                                if wyjscie == 'Q':
+                                                    break
+                                        if wyjscie == 'Q' or id_pojazd == 'B':
+                                            break                                        
                                         else:
                                             query_delete = SQLQueries.tabela_samochodow_delete
                                             query_after_delete = SQLQueries.tabela_samochodow
@@ -740,6 +819,7 @@ class Admin:
                                     self.delete_temp = True
                                     self.addnew = False
                                     Admin.tabela_pilotow(self, conn, cursor, 0, query_update, query_updated)
+                                    break
                             
                             # Tabela pilotów - usuwanie
                             if (choice == '3'):
@@ -771,8 +851,31 @@ class Admin:
                                     if (pytanie == 'B'):
                                         break
                                     else:
-                                        id_p = input('Podaj nr pilota, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
-                                        if (id_p == 'B'):
+                                        while(True):
+                                            try:
+                                                while(True):
+                                                    id_p = input('Podaj nr pilota, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
+                                                    if id_p == 'B':
+                                                        break
+                                                    id_p = int(id_p)
+                                                    if (id_p):
+                                                        query = SQLQueries.tabela_pilotow_for_update
+                                                        self.query_param = (id_p)
+                                                        Admin.tabela_pilotow_for_update(self, conn, cursor, query)
+                                                        if (len(self.result) == 0):
+                                                            print('Podałeś nr klienta spoza tabeli, spróbuj ponownie')
+                                                        else:
+                                                            break
+                                                if (len(self.result) != 0):
+                                                    break
+                                                if id_p == 'B':
+                                                    break                                                
+                                            except:
+                                                print('Podałeś zły nr klienta, spróbuj ponownie')
+                                                wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
+                                                if wyjscie == 'Q':
+                                                    break
+                                        if wyjscie == 'Q' or id_p == 'B':
                                             break
                                         else:
                                             query_delete = SQLQueries.tabela_pilotow_delete
@@ -1021,7 +1124,7 @@ class Admin:
                                             break
                                     except:
                                         print('Podałeś zły nr statusu, spróbuj ponownie')
-                                        wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować').upper()
+                                        wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
                                         if wyjscie == 'Q':
                                             break
                                 if wyjscie == 'Q':
@@ -1232,10 +1335,32 @@ class Admin:
                                     if (pytanie == 'B'):
                                         break
                                     else:
-                                        id_st = input('Podaj nr statusu, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
-                                        if (id_st == 'B'):
-                                            break
-                                        else:
+                                        while(True):
+                                            try:
+                                                while(True):
+                                                    id_st = input('Podaj nr statusu, który chcesz usunąć, aby powrócić do poprzedniego menu, naciśnij \'b\': ').upper()
+                                                    if (id_st == 'B'):
+                                                        break
+                                                    id_st = int(id_st)
+                                                    if (id_st):
+                                                        query = SQLQueries.tabela_statusow_for_update
+                                                        self.query_param = (id_st)
+                                                        Admin.tabela_statusow_for_update(self, conn, cursor, query)
+                                                        if (len(self.result) == 0):
+                                                            print('Podałeś nr statusu spoza tabeli, spróbuj ponownie')
+                                                        else:
+                                                            break
+                                                if (len(self.result) != 0):
+                                                    break
+                                            except:
+                                                print('Podałeś zły numer statusu, spróbuj ponownie')
+                                                wyjscie = input('Aby wyjść, naciśnij \'q\' lub inny klawisz aby kontynuować: ').upper()
+                                            if wyjscie == 'Q' or id_st == 'B':
+                                                id_st = 'Q'
+                                                break
+                                        if id_st == 'Q':
+                                            break   
+                                        else:    
                                             query_delete = SQLQueries.tabela_statusow_delete
                                             query_after_delete = SQLQueries.tabela_statusow
                                             self.query_param_after = (id_st)
